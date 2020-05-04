@@ -825,8 +825,6 @@ module.exports = formatWebpackMessages;
 "use strict";
 
 
-var _regeneratorRuntime = __webpack_require__(/*! @babel/runtime/regenerator */ "./node_modules/@babel/runtime/regenerator/index.js");
-
 var _slicedToArray = __webpack_require__(/*! @babel/runtime/helpers/slicedToArray */ "./node_modules/@babel/runtime/helpers/slicedToArray.js");
 
 var _interopRequireWildcard = __webpack_require__(/*! @babel/runtime/helpers/interopRequireWildcard */ "./node_modules/@babel/runtime/helpers/interopRequireWildcard.js");
@@ -836,40 +834,43 @@ var _interopRequireDefault = __webpack_require__(/*! @babel/runtime/helpers/inte
 exports.__esModule = true;
 exports["default"] = connect;
 
-var _eventsource = __webpack_require__(/*! ./eventsource */ "./node_modules/next/dist/client/dev/error-overlay/eventsource.js");
-
-var _formatWebpackMessages = _interopRequireDefault(__webpack_require__(/*! ./format-webpack-messages */ "./node_modules/next/dist/client/dev/error-overlay/format-webpack-messages.js"));
+var _unfetch = _interopRequireDefault(__webpack_require__(/*! next/dist/build/polyfills/unfetch */ "./node_modules/next/dist/build/polyfills/unfetch.js"));
 
 var ErrorOverlay = _interopRequireWildcard(__webpack_require__(/*! next/dist/compiled/react-error-overlay */ "./node_modules/next/dist/compiled/react-error-overlay/index.js"));
 
 var _stripAnsi = _interopRequireDefault(__webpack_require__(/*! next/dist/compiled/strip-ansi */ "./node_modules/next/dist/compiled/strip-ansi/index.js"));
 
+var _eventsource = __webpack_require__(/*! ./eventsource */ "./node_modules/next/dist/client/dev/error-overlay/eventsource.js");
+
+var _formatWebpackMessages = _interopRequireDefault(__webpack_require__(/*! ./format-webpack-messages */ "./node_modules/next/dist/client/dev/error-overlay/format-webpack-messages.js"));
+
 var _sourceMapSupport = __webpack_require__(/*! ./source-map-support */ "./node_modules/next/dist/client/dev/error-overlay/source-map-support.js");
-
-var _unfetch = _interopRequireDefault(__webpack_require__(/*! next/dist/build/polyfills/unfetch */ "./node_modules/next/dist/build/polyfills/unfetch.js"));
-/* eslint-disable camelcase */
-
 /**
-MIT License
-Copyright (c) 2013-present, Facebook, Inc.
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+* MIT License
+*
+* Copyright (c) 2013-present, Facebook, Inc.
+*
+* Permission is hereby granted, free of charge, to any person obtaining a copy
+* of this software and associated documentation files (the "Software"), to deal
+* in the Software without restriction, including without limitation the rights
+* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+* copies of the Software, and to permit persons to whom the Software is
+* furnished to do so, subject to the following conditions:
+*
+* The above copyright notice and this permission notice shall be included in all
+* copies or substantial portions of the Software.
+*
+* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+* LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+* OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+* SOFTWARE.
 */
-// This file is based on https://github.com/facebook/create-react-app/blob/v1.1.4/packages/react-dev-utils/webpackHotDevClient.js
-// It's been edited to rely on webpack-hot-middleware and to be more compatible with SSR / Next.js
+// This file is a modified version of the Create React App HMR dev client that
+// can be found here:
+// https://github.com/facebook/create-react-app/blob/v3.4.1/packages/react-dev-utils/webpackHotDevClient.js
 // This alternative WebpackDevServer combines the functionality of:
 // https://github.com/webpack/webpack-dev-server/blob/webpack-1/client/index.js
 // https://github.com/webpack/webpack/blob/webpack-1/hot/dev-server.js
@@ -877,9 +878,6 @@ SOFTWARE.
 // It makes some opinionated choices on top, like adding a syntax error overlay
 // that looks similar to our console output. The error overlay is inspired by:
 // https://github.com/glenjamin/webpack-hot-middleware
-// This is a modified version of create-react-app's webpackHotDevClient.js
-// It implements webpack-hot-middleware's EventSource events instead of webpack-dev-server's websocket.
-// https://github.com/facebook/create-react-app/blob/25184c4e91ebabd16fe1cde3d8630830e4a36a01/packages/react-dev-utils/webpackHotDevClient.js
 
 
 var hadRuntimeError = false;
@@ -952,7 +950,7 @@ function connect(options) {
 var isFirstCompilation = true;
 var mostRecentCompilationHash = null;
 var hasCompileErrors = false;
-var deferredBuildError = null;
+var hmrEventCount = 0;
 
 function clearOutdatedErrors() {
   // Clean up outdated compile errors, if any.
@@ -961,47 +959,58 @@ function clearOutdatedErrors() {
       console.clear();
     }
   }
-
-  deferredBuildError = null;
 } // Successful compilation.
 
 
 function handleSuccess() {
+  clearOutdatedErrors();
   var isHotUpdate = !isFirstCompilation;
   isFirstCompilation = false;
   hasCompileErrors = false; // Attempt to apply hot updates or reload.
 
   if (isHotUpdate) {
     tryApplyUpdates(function onHotUpdateSuccess() {
-      if (deferredBuildError) {
-        deferredBuildError();
-      } else {
-        // Only dismiss it when we're sure it's a hot update.
-        // Otherwise it would flicker right before the reload.
-        ErrorOverlay.dismissBuildError();
-      }
+      // Only dismiss it when we're sure it's a hot update.
+      // Otherwise it would flicker right before the reload.
+      tryDismissErrorOverlay();
     });
   }
 } // Compilation with warnings (e.g. ESLint).
 
 
 function handleWarnings(warnings) {
-  clearOutdatedErrors(); // Print warnings to the console.
+  clearOutdatedErrors();
+  var isHotUpdate = !isFirstCompilation;
+  isFirstCompilation = false;
+  hasCompileErrors = false;
 
-  var formatted = (0, _formatWebpackMessages["default"])({
-    warnings: warnings,
-    errors: []
-  });
+  function printWarnings() {
+    // Print warnings to the console.
+    var formatted = (0, _formatWebpackMessages["default"])({
+      warnings: warnings,
+      errors: []
+    });
 
-  if (typeof console !== 'undefined' && typeof console.warn === 'function') {
-    for (var i = 0; i < formatted.warnings.length; i++) {
-      if (i === 5) {
-        console.warn('There were more warnings in other files.\n' + 'You can find a complete log in the terminal.');
-        break;
+    if (typeof console !== 'undefined' && typeof console.warn === 'function') {
+      for (var i = 0; i < formatted.warnings.length; i++) {
+        if (i === 5) {
+          console.warn('There were more warnings in other files.\n' + 'You can find a complete log in the terminal.');
+          break;
+        }
+
+        console.warn((0, _stripAnsi["default"])(formatted.warnings[i]));
       }
-
-      console.warn((0, _stripAnsi["default"])(formatted.warnings[i]));
     }
+  }
+
+  printWarnings(); // Attempt to apply hot updates or reload.
+
+  if (isHotUpdate) {
+    tryApplyUpdates(function onSuccessfulHotUpdate() {
+      // Only dismiss it when we're sure it's a hot update.
+      // Otherwise it would flicker right before the reload.
+      tryDismissErrorOverlay();
+    });
   }
 } // Compilation with errors (e.g. syntax error or missing modules).
 
@@ -1022,6 +1031,22 @@ function handleErrors(errors) {
     for (var i = 0; i < formatted.errors.length; i++) {
       console.error((0, _stripAnsi["default"])(formatted.errors[i]));
     }
+  } // Do not attempt to reload now.
+  // We will reload on next success instead.
+
+
+  if (undefined) {
+    if (self.__NEXT_HMR_CB) {
+      self.__NEXT_HMR_CB(formatted.errors[0]);
+
+      self.__NEXT_HMR_CB = null;
+    }
+  }
+}
+
+function tryDismissErrorOverlay() {
+  if (!hasCompileErrors) {
+    ErrorOverlay.dismissBuildError();
   }
 } // There is a newer version of the code available.
 
@@ -1038,6 +1063,7 @@ function processMessage(e) {
   switch (obj.action) {
     case 'building':
       {
+        ++hmrEventCount;
         console.log('[HMR] bundle ' + (obj.name ? "'" + obj.name + "' " : '') + 'rebuilding');
         break;
       }
@@ -1045,7 +1071,7 @@ function processMessage(e) {
     case 'built':
     case 'sync':
       {
-        clearOutdatedErrors();
+        if (obj.action === 'built') ++hmrEventCount;
 
         if (obj.hash) {
           handleAvailableHash(obj.hash);
@@ -1054,45 +1080,57 @@ function processMessage(e) {
         var errors = obj.errors,
             warnings = obj.warnings;
         var hasErrors = Boolean(errors && errors.length);
-        var hasWarnings = Boolean(warnings && warnings.length);
 
         if (hasErrors) {
-          // When there is a compilation error coming from SSR we have to reload the page on next successful compile
-          if (obj.action === 'sync') {
-            hadRuntimeError = true;
-          }
-
-          handleErrors(errors);
-          break;
-        } else if (hasWarnings) {
-          handleWarnings(warnings);
+          return handleErrors(errors);
         }
 
-        handleSuccess();
-        break;
+        var hasWarnings = Boolean(warnings && warnings.length);
+
+        if (hasWarnings) {
+          return handleWarnings(warnings);
+        }
+
+        return handleSuccess();
       }
 
     case 'typeChecked':
       {
-        var _obj$data = _slicedToArray(obj.data, 1),
-            _obj$data$ = _obj$data[0],
-            _errors = _obj$data$.errors,
-            _warnings = _obj$data$.warnings;
+        var display = function display() {
+          // Another update has started, ignore type update:
+          if (!canApplyUpdates() || eventId !== hmrEventCount) {
+            return;
+          } // TypeScript errors to not take priority over compillation errors
 
-        var _hasErrors = Boolean(_errors && _errors.length);
 
-        var _hasWarnings = Boolean(_warnings && _warnings.length);
-
-        if (_hasErrors) {
-          if (canApplyUpdates()) {
-            handleErrors(_errors);
-          } else {
-            deferredBuildError = function deferredBuildError() {
-              return handleErrors(_errors);
-            };
+          if (hasCompileErrors) {
+            return;
           }
-        } else if (_hasWarnings) {
-          handleWarnings(_warnings);
+
+          handleErrors(_errors);
+        }; // We need to defer this until we're in an idle state.
+
+
+        var eventId = ++hmrEventCount;
+
+        var _obj$data = _slicedToArray(obj.data, 1),
+            _errors = _obj$data[0].errors;
+
+        var _hasErrors = Boolean(_errors && _errors.length); // Disregard event if there are no errors to report.
+
+
+        if (!_hasErrors) {
+          // We need to _try_ dismissing the error overlay, as code may not have
+          // changed, for example, when only types are updated.
+          // n.b. `handleSuccess` only dismisses the overlay if code was updated.
+          tryDismissErrorOverlay();
+          break;
+        }
+
+        if (canApplyUpdates()) {
+          display();
+        } else {
+          afterApplyUpdates(display);
         }
 
         break;
@@ -1121,89 +1159,74 @@ function isUpdateAvailable() {
 
 function canApplyUpdates() {
   return module.hot.status() === 'idle';
+}
+
+function afterApplyUpdates(fn) {
+  if (canApplyUpdates()) {
+    fn();
+  } else {
+    var handler = function handler(status) {
+      if (status === 'idle') {
+        module.hot.removeStatusHandler(handler);
+        fn();
+      }
+    };
+
+    module.hot.addStatusHandler(handler);
+  }
 } // Attempt to update code on the fly, fall back to a hard reload.
 
 
 function tryApplyUpdates(onHotUpdateSuccess) {
-  var handleApplyUpdates, updatedModules;
-  return _regeneratorRuntime.async(function tryApplyUpdates$(_context) {
-    while (1) {
-      switch (_context.prev = _context.next) {
-        case 0:
-          handleApplyUpdates = function _handleApplyUpdates(err, updatedModules) {
-            if (err || hadRuntimeError) {
-              if (err) {
-                console.warn('Error while applying updates, reloading page', err);
-              }
+  if (false) {}
 
-              if (hadRuntimeError) {
-                console.warn('Had runtime error previously, reloading page');
-              }
+  if (!isUpdateAvailable() || !canApplyUpdates()) {
+    return;
+  }
 
-              window.location.reload();
-              return;
-            }
+  function handleApplyUpdates(err, updatedModules) {
+    if (err || hadRuntimeError || !updatedModules) {
+      if (err) {
+        console.warn('Error while applying updates, reloading page', err);
+      }
 
-            if (typeof onHotUpdateSuccess === 'function') {
-              // Maybe we want to do something.
-              onHotUpdateSuccess();
-            }
+      if (hadRuntimeError) {
+        console.warn('Had runtime error previously, reloading page');
+      }
 
-            if (isUpdateAvailable()) {
-              // While we were updating, there was a new update! Do it again.
-              tryApplyUpdates();
-            }
-          };
+      window.location.reload();
+      return;
+    }
 
-          if (true) {
-            _context.next = 4;
-            break;
+    if (typeof onHotUpdateSuccess === 'function') {
+      // Maybe we want to do something.
+      onHotUpdateSuccess();
+    }
+
+    if (isUpdateAvailable()) {
+      // While we were updating, there was a new update! Do it again.
+      tryApplyUpdates();
+    } else {
+      if (undefined) {
+        afterApplyUpdates(function () {
+          if (self.__NEXT_HMR_CB) {
+            self.__NEXT_HMR_CB();
+
+            self.__NEXT_HMR_CB = null;
           }
-
-          // HotModuleReplacementPlugin is not in Webpack configuration.
-          console.error('HotModuleReplacementPlugin is not in Webpack configuration.'); // window.location.reload();
-
-          return _context.abrupt("return");
-
-        case 4:
-          if (!(!isUpdateAvailable() || !canApplyUpdates())) {
-            _context.next = 7;
-            break;
-          }
-
-          ErrorOverlay.dismissBuildError();
-          return _context.abrupt("return");
-
-        case 7:
-          _context.prev = 7;
-          _context.next = 10;
-          return _regeneratorRuntime.awrap(module.hot.check(
-          /* autoApply */
-          {
-            ignoreUnaccepted: true
-          }));
-
-        case 10:
-          updatedModules = _context.sent;
-
-          if (updatedModules) {
-            handleApplyUpdates(null, updatedModules);
-          }
-
-          _context.next = 17;
-          break;
-
-        case 14:
-          _context.prev = 14;
-          _context.t0 = _context["catch"](7);
-          handleApplyUpdates(_context.t0, null);
-
-        case 17:
-        case "end":
-          return _context.stop();
+        });
       }
     }
-  }, null, null, [[7, 14]], Promise);
+  } // https://webpack.js.org/api/hot-module-replacement/#check
+
+
+  module.hot.check(
+  /* autoApply */
+  true).then(function (updatedModules) {
+    handleApplyUpdates(null, updatedModules);
+  }, function (err) {
+    handleApplyUpdates(err, null);
+  });
 }
 
 /***/ }),
@@ -2739,6 +2762,7 @@ var _isDynamic = __webpack_require__(/*! ../next-server/lib/router/utils/is-dyna
 
 var _performanceRelayer = __webpack_require__(/*! ./performance-relayer */ "./node_modules/next/dist/client/performance-relayer.js");
 /* global location */
+/// <reference types="react-dom/experimental" />
 
 
 if (!('finally' in Promise.prototype)) {
@@ -2748,7 +2772,7 @@ if (!('finally' in Promise.prototype)) {
 
 var data = JSON.parse(document.getElementById('__NEXT_DATA__').textContent);
 window.__NEXT_DATA__ = data;
-var version = "9.3.5";
+var version = "9.3.6";
 exports.version = version;
 var props = data.props,
     err = data.err,
@@ -3343,6 +3367,11 @@ var _prerenderIndicator = _interopRequireDefault(__webpack_require__(/*! ./dev/p
 
 var _fouc = __webpack_require__(/*! ./dev/fouc */ "./node_modules/next/dist/client/dev/fouc.js");
 /* globals import('./dev/noop'); */
+// Temporary workaround for the issue described here:
+// https://github.com/zeit/next.js/issues/3775#issuecomment-407438123
+// The runtimeChunk doesn't have dynamic import handling code when there hasn't been a dynamic import
+// The runtimeChunk can't hot reload itself currently to correct it when adding pages using on-demand-entries
+// eslint-disable-next-line no-unused-expressions
 
 
 __webpack_require__.e(/*! import() */ 0).then(__webpack_require__.t.bind(null, /*! ./dev/noop */ "./node_modules/next/dist/client/dev/noop.js", 7));
@@ -3443,6 +3472,8 @@ var _routeMatcher = __webpack_require__(/*! ./../next-server/lib/router/utils/ro
 
 var _routeRegex = __webpack_require__(/*! ./../next-server/lib/router/utils/route-regex */ "./node_modules/next/dist/next-server/lib/router/utils/route-regex.js");
 
+var _router = __webpack_require__(/*! ./../next-server/lib/router/router */ "./node_modules/next/dist/next-server/lib/router/router.js");
+
 function hasRel(rel, link) {
   try {
     link = document.createElement('link');
@@ -3531,6 +3562,7 @@ var PageLoader = /*#__PURE__*/function () {
       var getHrefForSlug =
       /** @type string */
       function getHrefForSlug(path) {
+        path = (0, _router.delBasePath)(path);
         return _this2.assetPrefix + "/_next/data/" + _this2.buildId + (path === '/' ? '/index' : path) + ".json";
       };
 
@@ -4153,32 +4185,30 @@ function withRouter(ComposedComponent) {
   __webpack_require__.ab = __dirname + "/";
 
   function startup() {
-    return __webpack_require__(598);
+    return __webpack_require__(855);
   }
 
   return startup();
 }({
-  598: function _(e, r, t) {
+  849: function _(e) {
     "use strict";
 
-    var n = t(804);
+    e.exports = function () {
+      var _ref = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
+          _ref$onlyFirst = _ref.onlyFirst,
+          e = _ref$onlyFirst === void 0 ? false : _ref$onlyFirst;
 
-    var s = function s(e) {
-      return typeof e === "string" ? e.replace(n(), "") : e;
+      var r = ["[\\u001B\\u009B][[\\]()#;?]*(?:(?:(?:[a-zA-Z\\d]*(?:;[-a-zA-Z\\d\\/#&.:=?%@~_]*)*)?\\u0007)", "(?:(?:\\d{1,4}(?:;\\d{0,4})*)?[\\dA-PR-TZcf-ntqry=><~]))"].join("|");
+      return new RegExp(r, e ? undefined : "g");
     };
-
-    e.exports = s;
-    e.exports["default"] = s;
   },
-  804: function _(e) {
+  855: function _(e, r, t) {
     "use strict";
+
+    var n = t(849);
 
     e.exports = function (e) {
-      e = Object.assign({
-        onlyFirst: false
-      }, e);
-      var r = ["[\\u001B\\u009B][[\\]()#;?]*(?:(?:(?:[a-zA-Z\\d]*(?:;[-a-zA-Z\\d\\/#&.:=?%@~_]*)*)?\\u0007)", "(?:(?:\\d{1,4}(?:;\\d{0,4})*)?[\\dA-PR-TZcf-ntqry=><~]))"].join("|");
-      return new RegExp(r, e.onlyFirst ? undefined : "g");
+      return typeof e === "string" ? e.replace(n(), "") : e;
     };
   }
 });
@@ -4362,6 +4392,8 @@ function delBasePath(path) {
   return path.indexOf(basePath) === 0 ? path.substr(basePath.length) || '/' : path;
 }
 
+exports.delBasePath = delBasePath;
+
 function toRoute(path) {
   return path.replace(/\/$/, '') || '/';
 }
@@ -4375,8 +4407,8 @@ function fetchNextData(pathname, query, isServerRender, cb) {
 
   function getResponse() {
     return fetch(utils_1.formatWithValidation({
-      // @ts-ignore __NEXT_DATA__
-      pathname: "/_next/data/".concat(__NEXT_DATA__.buildId).concat(pathname, ".json"),
+      pathname: addBasePath( // @ts-ignore __NEXT_DATA__
+      "/_next/data/".concat(__NEXT_DATA__.buildId).concat(delBasePath(pathname), ".json")),
       query: query
     }), {
       // Cookies are required to be present for Next.js' SSG "Preview Mode".
@@ -4541,12 +4573,17 @@ var Router = /*#__PURE__*/function () {
     this.isFallback = isFallback;
 
     if (true) {
-      // in order for `e.state` to work on the `onpopstate` event
-      // we have to register the initial route upon initialization
-      this.changeState('replaceState', utils_1.formatWithValidation({
-        pathname: pathname,
-        query: query
-      }), as);
+      // make sure "as" doesn't start with double slashes or else it can
+      // throw an error as it's considered invalid
+      if (as.substr(0, 2) !== '//') {
+        // in order for `e.state` to work on the `onpopstate` event
+        // we have to register the initial route upon initialization
+        this.changeState('replaceState', utils_1.formatWithValidation({
+          pathname: pathname,
+          query: query
+        }), as);
+      }
+
       window.addEventListener('popstate', this.onPopState);
     }
   } // @deprecated backwards compatibility even though it's a private method.
@@ -5209,11 +5246,16 @@ exports.getRouteMatcher = getRouteMatcher;
 
 Object.defineProperty(exports, "__esModule", {
   value: true
-});
+}); // this isn't importing the escape-string-regex module
+// to reduce bytes
+
+function escapeRegex(str) {
+  return str.replace(/[|\\{}()[\]^$+*?.-]/g, '\\$&');
+}
 
 function getRouteRegex(normalizedRoute) {
   // Escape all characters that could be considered RegEx
-  var escapedRoute = (normalizedRoute.replace(/\/$/, '') || '/').replace(/[|\\{}()[\]^$+*?.-]/g, '\\$&');
+  var escapedRoute = escapeRegex(normalizedRoute.replace(/\/$/, '') || '/');
   var groups = {};
   var groupIndex = 1;
   var parameterizedRoute = escapedRoute.replace(/\/\\\[([^/]+?)\\\](?=\/|$)/g, function (_, $1) {
@@ -5226,10 +5268,17 @@ function getRouteRegex(normalizedRoute) {
     };
     return isCatchAll ? '/(.+?)' : '/([^/]+?)';
   });
-  return {
+  var namedParameterizedRoute; // dead code eliminate for browser since it's only needed
+  // while generating routes-manifest
+
+  if (false) {}
+
+  return Object.assign({
     re: new RegExp('^' + parameterizedRoute + '(?:/)?$', 'i'),
     groups: groups
-  };
+  }, namedParameterizedRoute ? {
+    namedRegex: "^".concat(namedParameterizedRoute, "(?:/)?$")
+  } : {});
 }
 
 exports.getRouteRegex = getRouteRegex;

@@ -460,8 +460,10 @@ class Head extends _react.Component {
       canonicalBase,
       __NEXT_DATA__,
       dangerousAsPath,
-      headTags
+      headTags,
+      unstable_runtimeJS
     } = this.context._documentProps;
+    const disableRuntimeJS = unstable_runtimeJS === false;
     const {
       _devOnlyInvalidateCacheQueryString
     } = this.context;
@@ -549,7 +551,7 @@ class Head extends _react.Component {
       });
     }
 
-    return _react.default.createElement("head", this.props, this.context._documentProps.isDevelopment && this.context._documentProps.hasCssMode && _react.default.createElement(_react.default.Fragment, null, _react.default.createElement("style", {
+    return _react.default.createElement("head", this.props, this.context._documentProps.isDevelopment && _react.default.createElement(_react.default.Fragment, null, _react.default.createElement("style", {
       "data-next-hide-fouc": true,
       "data-ampdevmode": inAmpMode ? 'true' : undefined,
       dangerouslySetInnerHTML: {
@@ -596,24 +598,24 @@ class Head extends _react.Component {
     })), !inAmpMode && _react.default.createElement(_react.default.Fragment, null, !hasAmphtmlRel && hybridAmp && _react.default.createElement("link", {
       rel: "amphtml",
       href: canonicalBase + getAmpPath(ampPath, dangerousAsPath)
-    }), this.getCssLinks(), page !== '/_error' && _react.default.createElement("link", {
-      rel: "preload",
-      href: assetPrefix + getOptionalModernScriptVariant(encodeURI(`/_next/static/${buildId}/pages${getPageFile(page)}`)) + _devOnlyInvalidateCacheQueryString,
-      as: "script",
-      nonce: this.props.nonce,
-      crossOrigin: this.props.crossOrigin || undefined
-    }), _react.default.createElement("link", {
+    }), this.getCssLinks(), !disableRuntimeJS && _react.default.createElement("link", {
       rel: "preload",
       href: assetPrefix + getOptionalModernScriptVariant(encodeURI(`/_next/static/${buildId}/pages/_app.js`)) + _devOnlyInvalidateCacheQueryString,
       as: "script",
       nonce: this.props.nonce,
       crossOrigin: this.props.crossOrigin || undefined
-    }), this.getPreloadDynamicChunks(), this.getPreloadMainLinks(), this.context._documentProps.isDevelopment && this.context._documentProps.hasCssMode && // this element is used to mount development styles so the
+    }), !disableRuntimeJS && page !== '/_error' && _react.default.createElement("link", {
+      rel: "preload",
+      href: assetPrefix + getOptionalModernScriptVariant(encodeURI(`/_next/static/${buildId}/pages${getPageFile(page)}`)) + _devOnlyInvalidateCacheQueryString,
+      as: "script",
+      nonce: this.props.nonce,
+      crossOrigin: this.props.crossOrigin || undefined
+    }), !disableRuntimeJS && this.getPreloadDynamicChunks(), !disableRuntimeJS && this.getPreloadMainLinks(), this.context._documentProps.isDevelopment && // this element is used to mount development styles so the
     // ordering matches production
     // (by default, style-loader injects at the bottom of <head />)
     _react.default.createElement("noscript", {
       id: "__next_css__DO_NOT_USE__"
-    }), styles || null), this.getFidPolyfill(), _react.default.createElement(_react.default.Fragment, {}, ...(headTags || [])));
+    }), styles || null), !disableRuntimeJS && this.getFidPolyfill(), _react.default.createElement(_react.default.Fragment, {}, ...(headTags || [])));
   }
 
 }
@@ -750,8 +752,10 @@ class NextScript extends _react.Component {
       inAmpMode,
       devFiles,
       __NEXT_DATA__,
-      bodyTags
+      bodyTags,
+      unstable_runtimeJS
     } = this.context._documentProps;
+    const disableRuntimeJS = unstable_runtimeJS === false;
     const {
       _devOnlyInvalidateCacheQueryString
     } = this.context;
@@ -803,7 +807,7 @@ class NextScript extends _react.Component {
       nonce: this.props.nonce,
       crossOrigin: this.props.crossOrigin || undefined
     },  false ? undefined : {})),  false && false];
-    return _react.default.createElement(_react.default.Fragment, null, devFiles ? devFiles.map(file => !file.match(/\.js\.map/) && _react.default.createElement("script", {
+    return _react.default.createElement(_react.default.Fragment, null, !disableRuntimeJS && devFiles ? devFiles.map(file => !file.match(/\.js\.map/) && _react.default.createElement("script", {
       key: file,
       src: `${assetPrefix}/_next/${encodeURI(file)}${_devOnlyInvalidateCacheQueryString}`,
       nonce: this.props.nonce,
@@ -816,7 +820,7 @@ class NextScript extends _react.Component {
       dangerouslySetInnerHTML: {
         __html: NextScript.getInlineScriptSource(this.context._documentProps)
       }
-    }),  false ? undefined : null, this.getPolyfillScripts(), page !== '/_error' && pageScript, appScript, staticMarkup ? null : this.getDynamicChunks(), staticMarkup ? null : this.getScripts(), _react.default.createElement(_react.default.Fragment, {}, ...(bodyTags || [])));
+    }),  false ? undefined : null, !disableRuntimeJS && this.getPolyfillScripts(), !disableRuntimeJS && appScript, !disableRuntimeJS && page !== '/_error' && pageScript, disableRuntimeJS || staticMarkup ? null : this.getDynamicChunks(), disableRuntimeJS || staticMarkup ? null : this.getScripts(), _react.default.createElement(_react.default.Fragment, {}, ...(bodyTags || [])));
   }
 
 }

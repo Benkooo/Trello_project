@@ -268,25 +268,28 @@ module.exports = _typeof;
 
 /***/ }),
 
-/***/ "./node_modules/next/dist/build/webpack/loaders/next-client-pages-loader.js?page=%2F_error&absolutePagePath=next%2Fdist%2Fpages%2F_error!./":
-/*!***********************************************************************************************************************************************!*\
-  !*** ./node_modules/next/dist/build/webpack/loaders/next-client-pages-loader.js?page=%2F_error&absolutePagePath=next%2Fdist%2Fpages%2F_error ***!
-  \***********************************************************************************************************************************************/
+/***/ "./node_modules/next/dist/build/webpack/loaders/next-client-pages-loader.js?page=%2F_error&absolutePagePath=next%2Fdist%2Fpages%2F_error&hotRouterUpdates=true!./":
+/*!*********************************************************************************************************************************************************************!*\
+  !*** ./node_modules/next/dist/build/webpack/loaders/next-client-pages-loader.js?page=%2F_error&absolutePagePath=next%2Fdist%2Fpages%2F_error&hotRouterUpdates=true ***!
+  \*********************************************************************************************************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
 
-    (window.__NEXT_P=window.__NEXT_P||[]).push(["/_error", function() {
-      var mod = __webpack_require__(/*! next/dist/pages/_error */ "./node_modules/next/dist/pages/_error.js")
-      if(true) {
-        module.hot.accept(/*! next/dist/pages/_error */ "./node_modules/next/dist/pages/_error.js", function() {
-          if(!next.router.components["/_error"]) return
-          var updatedPage = __webpack_require__(/*! next/dist/pages/_error */ "./node_modules/next/dist/pages/_error.js")
-          next.router.update("/_error", updatedPage)
-        })
+    (window.__NEXT_P = window.__NEXT_P || []).push([
+      "/_error",
+      function () {
+        var mod = __webpack_require__(/*! next/dist/pages/_error */ "./node_modules/next/dist/pages/_error.js");
+        if (true) {
+          module.hot.accept(/*! next/dist/pages/_error */ "./node_modules/next/dist/pages/_error.js", function () {
+            if (!next.router.components["/_error"]) return;
+            var updatedPage = __webpack_require__(/*! next/dist/pages/_error */ "./node_modules/next/dist/pages/_error.js");
+            next.router.update("/_error", updatedPage);
+          });
+        }
+        return mod;
       }
-      return mod
-    }]);
+    ]);
   
 
 /***/ }),
@@ -846,5 +849,5 @@ module.exports = dll_2adc2403d89adc16ead0;
 
 /***/ })
 
-},[["./node_modules/next/dist/build/webpack/loaders/next-client-pages-loader.js?page=%2F_error&absolutePagePath=next%2Fdist%2Fpages%2F_error!./","static/runtime/webpack.js"]]]);
+},[["./node_modules/next/dist/build/webpack/loaders/next-client-pages-loader.js?page=%2F_error&absolutePagePath=next%2Fdist%2Fpages%2F_error&hotRouterUpdates=true!./","static/runtime/webpack.js"]]]);
 //# sourceMappingURL=_error.js.map
