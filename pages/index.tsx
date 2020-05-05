@@ -1,15 +1,30 @@
-import Link from 'next/link'
-import Layout from '../components/Layout'
+import LoginController from "../components/login/LoginController";
+import {makeStyles} from "@material-ui/styles";
+import {createStyles} from "@material-ui/core";
 
-const IndexPage = () => (
-  <Layout title="Home | Next.js + TypeScript Example">
-    <h1>Hello Next.js 👋</h1>
-    <p>
-      <Link href="/about">
-        <a>About</a>
-      </Link>
-    </p>
-  </Layout>
-)
 
-export default IndexPage
+const useStyles = makeStyles(
+    createStyles({
+        root: {
+            '& > *': {
+                background: "red",
+                height: "100%"
+            },
+        },
+    }),
+);
+
+const IndexPage = () => {
+    const classes = useStyles();
+    return (
+    <div className={classes.root}  style={{ height: "100%", textAlign: "center"}}>
+        <div>
+            <LoginController/>
+        </div>
+    </div>
+    );
+}
+
+
+
+export default IndexPage;
