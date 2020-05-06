@@ -20,18 +20,20 @@ const useStyles = makeStyles(
     }),
 );
 
-const BoardsPage: React.FC = () => {
+const HomePage: React.FC = () => {
 
     const classes = useStyles()
 
     return (
-        <div className={classes.root}>
+        <div className={classes.root} >
             <Topbar />
-            <h1>
-                Board page
-            </h1>
+            <div style={{display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
+                <h1>
+                    Home page
+                </h1>
+            </div>
         </div>
     )
 }
 
-export default BoardsPage
+export default HomePage

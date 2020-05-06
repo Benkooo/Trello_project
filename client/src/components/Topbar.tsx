@@ -26,7 +26,7 @@ const Topbar: React.FC<Props> = () => {
                         <MenuIcon />
                     </IconButton>
                     <Link
-                        href='/boards'
+                        href='/home'
                     >
                         <IconButton
                             style={{marginBottom: '17px'}}
@@ -57,16 +57,6 @@ const Topbar: React.FC<Props> = () => {
                         inputProps={{ 'aria-label': 'search' }}
                         />
                     </Card>
-
-                    {/* <Card>
-                        <CardActionArea>
-                            <CardMedia 
-                                style={{height: '110px'}}
-                                image={imagePath}
-                                title="logo"
-                            />
-                        </CardActionArea>
-                    </Card>  */}
 
                     <div style={{display: 'flex', justifyContent: 'center', alignItems: 'center', marginLeft: 'auto'}}>
                         <IconButton
