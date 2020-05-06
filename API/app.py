@@ -1,4 +1,5 @@
 from flask import Flask, jsonify, request, session
+from flask_cors import CORS
 
 import config
 
@@ -9,6 +10,7 @@ import db
 
 app = Flask(__name__)
 app.config["SECRET_KEY"] = ''.join(random.SystemRandom().choice(string.ascii_uppercase + string.digits) for _ in range(128))
+CORS(app)
 
 @app.route('/', methods=['GET'])
 def home():
