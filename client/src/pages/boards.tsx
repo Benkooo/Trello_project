@@ -1,4 +1,4 @@
-import LoginController from "../components/login/LoginController";
+import React from 'react'
 import Topbar from '../components/Topbar'
 import {makeStyles} from "@material-ui/styles";
 import {createStyles} from "@material-ui/core";
@@ -20,16 +20,18 @@ const useStyles = makeStyles(
     }),
 );
 
-const IndexPage = () => {
-    const classes = useStyles();
+const BoardsPage: React.FC = () => {
+
+    const classes = useStyles()
+
     return (
-    <div className={classes.root}  style={{ height: "100%", textAlign: "center"}}>
-        <div>
+        <div className={classes.root}>
             <Topbar />
-            <LoginController/>
+            <h1>
+                Board page
+            </h1>
         </div>
-    </div>
-    );
+    )
 }
 
-export default IndexPage;
+export default BoardsPage
