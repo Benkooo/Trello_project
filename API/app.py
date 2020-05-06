@@ -20,27 +20,27 @@ def home():
 
 @app.route('/register', methods=['POST'])
 def register():
-    if not all(_ in request.form for _ in ('password', 'username', 'email')):
+    if not all(_ in request.json for _ in ('password', 'username', 'email')):
         return jsonify({'success': False, 'message': 'Please fill the form'})
-    print(request.form['password'])
-    print(request.form['username'])
-    print(request.form['email'])
+    print(request.json['password'])
+    print(request.json['username'])
+    print(request.json['email'])
     my_db = db.Database()
-    my_db.add_user(request.form['username'], request.form['email'], request.form['password'])
+    my_db.add_user(request.json['username'], request.json['email'], request.json['password'])
     session['logged_in'] = True
-    session['username'] = request.form['username']
+    session['username'] = request.json['username']
     return jsonify({'success': True, 'message': 'Registered successfully'})
 
 @app.route('/login', methods=['POST'])
 def login():
-    if not all(_ in request.form for _ in ('password', 'email')):
+    if not all(_ in request.json for _ in ('password', 'email')):
         return jsonify({'success': False, 'message': 'please fill the form'})
-    print(request.form['email'])
-    print(request.form['password'])
+    print(request.json['email'])
+    print(request.json['password'])
     my_db = db.Database()
-    if my_db.check_password(request.form['email'], request.form['password']):
+    if my_db.check_password(request.json['email'], request.json['password']):
         session['logged_in'] = True
-        session['username'] = db.Database().get_username_from_email(request.form['email'])
+        session['username'] = db.Database().get_username_from_email(request.json['email'])
         return jsonify({'success': True, 'message': 'Successfully logged in'})
     else:
         return jsonify({'success': False, 'message': 'username or password is false'})
