@@ -39,16 +39,26 @@ class Database:
         finally:
             self.connection.close()
 
-    def check_password(self, username, password):
+    def check_password(self, email, password):
         try:
             with self.connection.cursor() as cursor:
-                sql = "SELECT password FROM users WHERE username=%s"
-                cursor.execute(sql, (username,))
+                sql = "SELECT password FROM users WHERE email=%s"
+                cursor.execute(sql, (email,))
                 result = cursor.fetchone()
                 hashed = hashlib.sha256((password + config.SALT).encode('utf-8'))
-                if 'password' in result and result['password'] == hashed.hexdigest():
+                if result and 'password' in result and result['password'] == hashed.hexdigest():
                     return True
         finally:
             self.connection.close()
         return False
 
+    def get_username_from_email(self, email):
+        try:
+            with self.connection.cursor() as cursor:
+                sql = "SELECT username FROM users WHERE email=%s"
+                cursor.execute(sql, (email,))
+                result = cursor.fetchone()
+                return result['username']
+        finally:
+            self.connection.close()
+        return None

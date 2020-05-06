@@ -1,4 +1,5 @@
 from flask import Flask, jsonify, request, session
+from flask_cors import CORS
 
 import config
 
@@ -9,6 +10,7 @@ import db
 
 app = Flask(__name__)
 app.config["SECRET_KEY"] = ''.join(random.SystemRandom().choice(string.ascii_uppercase + string.digits) for _ in range(128))
+CORS(app)
 
 @app.route('/', methods=['GET'])
 def home():
@@ -31,14 +33,14 @@ def register():
 
 @app.route('/login', methods=['POST'])
 def login():
-    if not all(_ in request.form for _ in ('password', 'username')):
+    if not all(_ in request.form for _ in ('password', 'email')):
         return jsonify({'success': False, 'message': 'please fill the form'})
-    print(request.form['username'])
+    print(request.form['email'])
     print(request.form['password'])
     my_db = db.Database()
-    if my_db.check_password(request.form['username'], request.form['password']):
+    if my_db.check_password(request.form['email'], request.form['password']):
         session['logged_in'] = True
-        session['username'] = request.form['username']
+        session['username'] = db.Database().get_username_from_email(request.form['email'])
         return jsonify({'success': True, 'message': 'Successfully logged in'})
     else:
         return jsonify({'success': False, 'message': 'username or password is false'})
