@@ -25,11 +25,12 @@ def register():
     print(request.json['password'])
     print(request.json['username'])
     print(request.json['email'])
-    my_db = db.Database()
-    my_db.add_user(request.json['username'], request.json['email'], request.json['password'])
-    session['logged_in'] = True
-    session['username'] = request.json['username']
-    return jsonify({'success': True, 'message': 'Registered successfully'})
+    if db.Database().add_user(request.json['username'], request.json['email'], request.json['password']):
+        session['logged_in'] = True
+        session['username'] = request.json['username']
+        return jsonify({'success': True, 'message': 'Registered successfully'})
+    else:
+        return jsonify({'success': False, 'message': 'The username or the email exists'})
 
 @app.route('/login', methods=['POST'])
 def login():
@@ -54,7 +55,6 @@ def logout():
 
 @app.route('/<username>/boards', methods=['POST', 'GET'])
 def boards(username):
-    #session['logged_in'] = False
     print(username)
     if 'logged_in' in session and session['logged_in'] and 'username' in session:
         if username == session['username']:
