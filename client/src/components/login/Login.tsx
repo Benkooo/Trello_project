@@ -68,12 +68,9 @@ const Login = (props: Props) => {
     const [success, setSuccess] = useState(false);
     const [error, setError] = useState(false);
     const [message, setMessage] = useState("")
-    const [favoriteItems] = useState(Array<number>())
 
 
     const handleButtonClick = () => {
-        favoriteItems.push(32)
-        console.log(favoriteItems)
         if (!loading) {
             setLoading(true);
             timer.current = setTimeout(() => {
