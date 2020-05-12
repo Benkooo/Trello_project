@@ -12,7 +12,7 @@ interface Props {
 }
 
 const Topbar: React.FC<Props> = () => {
-    
+
     return (
         <div style={{flexGrow: 1}}>
             <AppBar style={{height: '46px', backgroundColor: '#366AA8'}} elevation={2} position="static">
@@ -91,5 +91,5 @@ const Topbar: React.FC<Props> = () => {
         </div>
     )
 }
-  
+
 export default Topbar

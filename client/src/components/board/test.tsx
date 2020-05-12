@@ -3,7 +3,7 @@ import Card from './Card'
 import update from 'immutability-helper'
 
 const style = {
-    width: 300,
+    width: 310,
 }
 
 export interface Item {
