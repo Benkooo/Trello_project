@@ -12,13 +12,13 @@ interface Props {
 }
 
 const Topbar: React.FC<Props> = () => {
-    
+
     return (
         <div style={{flexGrow: 1}}>
-            <AppBar style={{height: '46px', backgroundColor: '#366AA8'}} elevation={2} position="static">
+            <AppBar style={{height: '43px', backgroundColor: '#366AA8'}} elevation={2} position="fixed">
                 <Toolbar>
                     <IconButton
-                        style={{marginBottom: '17px'}}
+                        style={{marginBottom: '21px'}}
                         edge="start"
                         color="inherit"
                         aria-label="open drawer"
@@ -29,7 +29,7 @@ const Topbar: React.FC<Props> = () => {
                         href='/home'
                     >
                         <IconButton
-                            style={{marginBottom: '17px'}}
+                            style={{marginBottom: '21px'}}
                             edge="start"
                             color="inherit"
                             aria-label="open drawer"
@@ -37,7 +37,7 @@ const Topbar: React.FC<Props> = () => {
                             <HomeIcon />
                         </IconButton>
                     </Link>
-                    <Card style={{ backgroundColor: '#67A6CA', marginBottom: '17px', width: '250px', maxWidth: '120px', minWidth: '120px', height: '32px', justifyContent: 'center', alignItems: 'center', display: 'flex'}} >
+                    <Card style={{ backgroundColor: '#67A6CA', marginBottom: '21px', width: '250px', maxWidth: '120px', minWidth: '120px', height: '32px', justifyContent: 'center', alignItems: 'center', display: 'flex'}} >
                         <CardActionArea >
                             <div style={{color: 'white', display: 'flex', justifyContent: 'center', height: '32px', alignItems: 'center', flexDirection: 'row'}}>
                                 <TableChartIcon style={{marginRight: '23px'}}/>
@@ -47,8 +47,8 @@ const Topbar: React.FC<Props> = () => {
                             </div>
                         </CardActionArea>
                     </Card>
-                    <Card style={{ minWidth: '120px', marginLeft: '7px',backgroundColor: '#67A6CA', marginBottom: '17px', position: 'relative'}}>
-                        <div style={{color: 'white', marginLeft: '10px', marginBottom: '17px', height: '100%', position: 'absolute', pointerEvents: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+                    <Card style={{ width: '180px', minWidth: '120px', marginLeft: '5px',backgroundColor: '#67A6CA', marginBottom: '21px', position: 'relative'}}>
+                        <div style={{color: 'white', marginLeft: '10px', marginBottom: '21px', height: '100%', position: 'absolute', pointerEvents: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
                             <SearchIcon />
                         </div>
                         <InputBase
@@ -60,7 +60,7 @@ const Topbar: React.FC<Props> = () => {
 
                     <div style={{display: 'flex', justifyContent: 'center', alignItems: 'center', marginLeft: 'auto'}}>
                         <IconButton
-                            style={{marginBottom: '17px'}}
+                            style={{marginBottom: '21px'}}
                             edge="start"
                             color="inherit"
                             aria-label="open drawer"
@@ -68,7 +68,7 @@ const Topbar: React.FC<Props> = () => {
                             <AddIcon />
                         </IconButton>
                         <IconButton
-                            style={{marginBottom: '17px'}}
+                            style={{marginBottom: '21px'}}
                             edge="start"
                             color="inherit"
                             aria-label="open drawer"
@@ -76,7 +76,7 @@ const Topbar: React.FC<Props> = () => {
                             <InfoIcon />
                         </IconButton>
                         <IconButton
-                            style={{marginBottom: '17px'}}
+                            style={{marginBottom: '21px'}}
                             edge="start"
                             color="inherit"
                             aria-label="open drawer"
