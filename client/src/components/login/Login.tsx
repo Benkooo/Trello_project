@@ -1,8 +1,13 @@
 import React, {useState} from 'react';
-import {Button, CircularProgress, createStyles, Divider, TextField, Typography} from "@material-ui/core";
+import {Button, CircularProgress, createStyles, Divider, Snackbar, TextField, Typography} from "@material-ui/core";
 import {sha256} from "js-sha256";
 import {LoginResponse} from "../../interfaces/requests";
 import {makeStyles} from "@material-ui/styles";
+import Router from "next/router";
+import MuiAlert, { AlertProps } from '@material-ui/lab/Alert';
+import {storeString} from "../../helpers/SessionStorageHelper";
+// import Register from "./Register";
+
 // import {green} from "@material-ui/core/colors";
 
 const useStyles = makeStyles(createStyles({
@@ -20,8 +25,11 @@ interface Props {
     setDisplayRegister: (b: boolean) => void;
 }
 
-const requestLogin = async (email: string, password: string) => {
-    console.log(email + "    " + password);
+function Alert(props: AlertProps) {
+    return <MuiAlert elevation={6} variant="filled" {...props} />;
+}
+
+export const requestLogin = async (email: string, password: string) : Promise<[boolean, string]> => {
     const headers = new Headers();
     headers.append("Content-Type", "application/json");
 
@@ -39,16 +47,14 @@ const requestLogin = async (email: string, password: string) => {
             })
         ).json()) as LoginResponse;
         if (response.success) {
-            alert("ça fonctionne");
-            // SUCCESS
+            storeString("userEmail", email);
+            return [response.success, response.message];
         } else {
-            alert("error")
-            // ERROR
+            return [response.success, response.message];
         }
     } catch (error) {
         // ERROR
-        alert("error")
-        console.log(error);
+        return [false, "Connection error"]
     }
 };
 
@@ -59,14 +65,29 @@ const Login = (props: Props) => {
     const classes = useStyles();
     const timer = React.useRef<any>();
     const formValid = (username != "" && password != "")
+    const [success, setSuccess] = useState(false);
+    const [error, setError] = useState(false);
+    const [message, setMessage] = useState("")
+    const [favoriteItems] = useState(Array<number>())
+
 
     const handleButtonClick = () => {
+        favoriteItems.push(32)
+        console.log(favoriteItems)
         if (!loading) {
             setLoading(true);
             timer.current = setTimeout(() => {
                 setLoading(false);
             }, 2000);
         }
+    };
+
+    const handleClose = (_event?: React.SyntheticEvent, reason?: string) => {
+        if (reason === 'clickaway') {
+            return;
+        }
+        setError(false)
+        setSuccess(false);
     };
 
     return (
@@ -78,7 +99,7 @@ const Login = (props: Props) => {
                     justifyContent: "space-between",
                 }}
             >
-                <Typography variant="h6" gutterBottom style={{marginBottom: "20px", color: "grey"}}>
+                <Typography variant="h6" gutterBottom style={{color: "grey", display: "flex", justifyContent: "center"}}>
                     Se connecter à EpiTrello
                 </Typography>
                 {loading && <CircularProgress size={48} className={classes.buttonProgress}/>}
@@ -98,31 +119,47 @@ const Login = (props: Props) => {
                     value={password}
                     onChange={(sender: any) => setPassword(sender.target.value)}
                 />
-                <div>
-                    <div>
-                        <Button
-                            disabled={!formValid}
-                            color="primary"
-                            style={{ marginTop: "20px", justifyContent: "center" }}
-                            onClick={() =>  {
-                                handleButtonClick();
-                                requestLogin(username, sha256(password))
-                            }}
-                        >
-                            Se connecter
-                        </Button>
-                    </div>
-                    <Divider variant={"middle"}/>
-                    <div>
-                        <Button
-                            color="primary"
-                            style={{ marginTop: "20px", fontSize: "12px"}}
-                            onClick={() => props.setDisplayRegister(true)}
-                        >
-                            Inscivez-vous à un compte
-                        </Button>
-                    </div>
+                <div style={{display: "flex", justifyContent: "center"}}>
+                    <Button
+                        disabled={!formValid}
+                        color="primary"
+                        style={{ marginTop: "20px", marginBottom: "20px"}}
+                        onClick={() =>  {
+                            handleButtonClick();
+                            requestLogin(username, sha256(password)).then(function(value) {
+                                if (value[0]) {
+                                    setSuccess(true)
+                                    Router.push("/home")
+                                }
+                                else
+                                    setError(true)
+                                setMessage(value[1])
+                            })
+                        }}
+                    >
+                        Se connecter
+                    </Button>
                 </div>
+                <Divider variant={"middle"}/>
+                <div style={{display: "flex", justifyContent: "center"}}>
+                    <Button
+                        color="primary"
+                        style={{ marginTop: "20px", fontSize: "12px"}}
+                        onClick={() => props.setDisplayRegister(true)}
+                    >
+                        Inscivez-vous à un compte
+                    </Button>
+                </div>
+                <Snackbar open={success} autoHideDuration={6000} onClose={handleClose}>
+                    <Alert onClose={handleClose} severity="success">
+                        {message}
+                    </Alert>
+                </Snackbar>
+                <Snackbar open={error} autoHideDuration={6000} onClose={handleClose}>
+                    <Alert onClose={handleClose} severity="error">
+                        {message}
+                    </Alert>
+                </Snackbar>
             </div>
         </div>
     );
