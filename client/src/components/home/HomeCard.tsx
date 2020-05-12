@@ -1,13 +1,15 @@
 import React from 'react'
 import { Card, CardActionArea, IconButton } from '@material-ui/core'
-import FavoriteBorderIcon from '@material-ui/icons/FavoriteBorder';
+import StarBorderIcon from '@material-ui/icons/StarBorder';
 
 interface Props {
     title: string,
-    addItems: any
+    addItems: any,
+    favorite: boolean,
 }
 
-const HomeCard: React.FC<Props> = ({title, addItems}) => {
+const HomeCard: React.FC<Props> = ({title, addItems, favorite}) => {
+
     return (
         <div>
             <CardActionArea style={{marginTop: '10px'}}>
@@ -17,9 +19,15 @@ const HomeCard: React.FC<Props> = ({title, addItems}) => {
                         </div>
                 </Card>
             </CardActionArea>
-            <IconButton itemID={title} onClick={addItems} style={{marginTop: '-80px', marginLeft: '72%', marginBottom: '-20px'}}>
-                <FavoriteBorderIcon style={{height: '17px', color: 'white'}} />
-            </IconButton>
+            {
+                favorite ?
+                    <IconButton itemID={title} onClick={addItems} style={{marginTop: '-80px', marginLeft: '72%', marginBottom: '-20px'}}>
+                        <StarBorderIcon style={{height: '17px', color: 'yellow'}} />
+                    </IconButton> :
+                    <IconButton itemID={title} onClick={addItems} style={{marginTop: '-80px', marginLeft: '72%', marginBottom: '-20px'}}>
+                        <StarBorderIcon style={{height: '17px', color: 'white'}} />
+                    </IconButton>
+            }
         </div>
     )
 }
