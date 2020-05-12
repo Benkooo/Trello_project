@@ -1,24 +1,45 @@
 import React, {useState} from 'react';
-import {Button, TextField, Typography} from "@material-ui/core";
+import {Button, CircularProgress, createStyles, Divider, Snackbar, TextField, Typography} from "@material-ui/core";
 import {sha256} from "js-sha256";
 import {LoginResponse} from "../../interfaces/requests";
+import {makeStyles} from "@material-ui/styles";
+import Router from "next/router";
+import MuiAlert, { AlertProps } from '@material-ui/lab/Alert';
+import {storeString} from "../../helpers/SessionStorageHelper";
+// import Register from "./Register";
+
+// import {green} from "@material-ui/core/colors";
+
+const useStyles = makeStyles(createStyles({
+        buttonProgress: {
+            position: 'absolute'
+        },
+        textField: {
+            marginTop: "10px",
+            marginBottom: "10px"
+        }
+    }),
+);
 
 interface Props {
     setDisplayRegister: (b: boolean) => void;
 }
 
-const requestLogin = async (username: string, password: string) => {
-    console.log("TEST")
-    var headers = new Headers();
+function Alert(props: AlertProps) {
+    return <MuiAlert elevation={6} variant="filled" {...props} />;
+}
+
+export const requestLogin = async (email: string, password: string) : Promise<[boolean, string]> => {
+    const headers = new Headers();
     headers.append("Content-Type", "application/json");
 
-    var raw = JSON.stringify({
-        username: username,
+    const raw = JSON.stringify({
+        email: email,
         password: password
     });
     try {
-        var response = (await (
-            await fetch("http://localhost:8080/login", {
+        const response = (await (
+            await fetch("http://localhost:5000/login", {
                 method: "POST",
                 body: raw,
                 headers,
@@ -26,22 +47,51 @@ const requestLogin = async (username: string, password: string) => {
             })
         ).json()) as LoginResponse;
         if (response.success) {
-            // SUCCESS
+            storeString("userEmail", email);
+            return [response.success, response.message];
         } else {
-            // ERROR
+            return [response.success, response.message];
         }
     } catch (error) {
         // ERROR
-        console.log(error);
+        return [false, "Connection error"]
     }
 };
 
 const Login = (props: Props) => {
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
+    const [loading, setLoading] = useState(false);
+    const classes = useStyles();
+    const timer = React.useRef<any>();
+    const formValid = (username != "" && password != "")
+    const [success, setSuccess] = useState(false);
+    const [error, setError] = useState(false);
+    const [message, setMessage] = useState("")
+    const [favoriteItems] = useState(Array<number>())
+
+
+    const handleButtonClick = () => {
+        favoriteItems.push(32)
+        console.log(favoriteItems)
+        if (!loading) {
+            setLoading(true);
+            timer.current = setTimeout(() => {
+                setLoading(false);
+            }, 2000);
+        }
+    };
+
+    const handleClose = (_event?: React.SyntheticEvent, reason?: string) => {
+        if (reason === 'clickaway') {
+            return;
+        }
+        setError(false)
+        setSuccess(false);
+    };
 
     return (
-        <div style={{ width: "100vh" }}>
+        <div style={{ width: "40vh", margin: "20px"}}>
             <div
                 style={{
                     display: "flex",
@@ -49,42 +99,67 @@ const Login = (props: Props) => {
                     justifyContent: "space-between",
                 }}
             >
-                <Typography variant="h4" gutterBottom>
-                    Login
+                <Typography variant="h6" gutterBottom style={{color: "grey", display: "flex", justifyContent: "center"}}>
+                    Se connecter à EpiTrello
                 </Typography>
+                {loading && <CircularProgress size={48} className={classes.buttonProgress}/>}
                 <TextField
+                    className={classes.textField}
                     id="standard-basic"
-                    label="Username or email"
+                    label="E-mail"
                     autoFocus
                     value={username}
                     onChange={(sender: any) => setUsername(sender.target.value)}
                 />
                 <TextField
+                    className={classes.textField}
                     id="standard-password-input"
                     type="password"
-                    label="Password"
-                    style={{ marginTop: "40px" }}
+                    label="Mot de passe"
                     value={password}
                     onChange={(sender: any) => setPassword(sender.target.value)}
                 />
-                <div>
+                <div style={{display: "flex", justifyContent: "center"}}>
+                    <Button
+                        disabled={!formValid}
+                        color="primary"
+                        style={{ marginTop: "20px", marginBottom: "20px"}}
+                        onClick={() =>  {
+                            handleButtonClick();
+                            requestLogin(username, sha256(password)).then(function(value) {
+                                if (value[0]) {
+                                    setSuccess(true)
+                                    Router.push("/home")
+                                }
+                                else
+                                    setError(true)
+                                setMessage(value[1])
+                            })
+                        }}
+                    >
+                        Se connecter
+                    </Button>
+                </div>
+                <Divider variant={"middle"}/>
+                <div style={{display: "flex", justifyContent: "center"}}>
                     <Button
                         color="primary"
-                        style={{ marginTop: "40px", justifyContent: "center" }}
-                        onClick={() => requestLogin(username, sha256(password))}
+                        style={{ marginTop: "20px", fontSize: "12px"}}
+                        onClick={() => props.setDisplayRegister(true)}
                     >
-                        Login
+                        Inscivez-vous à un compte
                     </Button>
-                    <div>
-                        <Button
-                            color="primary"
-                            style={{ marginTop: "10px" }}
-                            onClick={() => props.setDisplayRegister(true)}
-                        >
-                            Register >
-                        </Button>
-                    </div>
                 </div>
+                <Snackbar open={success} autoHideDuration={6000} onClose={handleClose}>
+                    <Alert onClose={handleClose} severity="success">
+                        {message}
+                    </Alert>
+                </Snackbar>
+                <Snackbar open={error} autoHideDuration={6000} onClose={handleClose}>
+                    <Alert onClose={handleClose} severity="error">
+                        {message}
+                    </Alert>
+                </Snackbar>
             </div>
         </div>
     );

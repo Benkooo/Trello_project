@@ -17,6 +17,7 @@ class Database:
                                           user=config.DB_USER,
                                           password=config.DB_PASSWORD,
                                           db=config.DB_NAME,
+                                          port=config.DB_PORT,
                                           charset='utf8mb4',
                                           cursorclass=pymysql.cursors.DictCursor
         )
@@ -36,6 +37,9 @@ class Database:
                 cursor.execute(sql, (email,))
                 result = cursor.fetchone()
                 print(result)
+            return True
+        except:
+            return False
         finally:
             self.connection.close()
 

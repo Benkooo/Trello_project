@@ -1,5 +1,16 @@
 import React from 'react'
-import {AppBar, Toolbar, IconButton, InputBase, Card, CardActionArea, Typography, Avatar } from '@material-ui/core'
+import {
+    AppBar,
+    Toolbar,
+    IconButton,
+    InputBase,
+    Card,
+    CardActionArea,
+    Typography,
+    Menu,
+    MenuItem,
+    Divider
+} from '@material-ui/core'
 import MenuIcon from '@material-ui/icons/Menu'
 import HomeIcon from '@material-ui/icons/Home';
 import SearchIcon from '@material-ui/icons/Search';
@@ -7,11 +18,48 @@ import TableChartIcon from '@material-ui/icons/TableChart';
 import AddIcon from '@material-ui/icons/Add';
 import InfoIcon from '@material-ui/icons/Info';
 import Link from 'next/link'
+import {AccountCircle} from "@material-ui/icons";
+import {LoginResponse} from "../interfaces/requests";
+import Router from "next/router";
+import {getString} from "../helpers/SessionStorageHelper";
 
 interface Props {
 }
 
+const logout = async () => {
+    try {
+        const response = (await (
+            await fetch("http://localhost:5000/logout", {
+                method: "POST",
+                redirect: "follow"
+            })
+        ).json()) as LoginResponse;
+        if (response.success) {
+            // SUCCESS
+            await Router.push("/")
+        } else {
+            // ERROR
+            alert(response.message)
+        }
+    } catch (error) {
+        // ERROR
+        alert("error")
+        console.log(error);
+    }
+}
+
 const Topbar: React.FC<Props> = () => {
+    const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+    const userEmail = getString("userEmail")
+    console.log(userEmail)
+
+    const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+        setAnchorEl(event.currentTarget);
+    };
+
+    const handleClose = () => {
+        setAnchorEl(null);
+    };
 
     return (
         <div style={{flexGrow: 1}}>
@@ -52,9 +100,9 @@ const Topbar: React.FC<Props> = () => {
                             <SearchIcon />
                         </div>
                         <InputBase
-                        style={{color: 'white', marginLeft: '40px' }}
-                        placeholder="Search…"
-                        inputProps={{ 'aria-label': 'search' }}
+                            style={{color: 'white', marginLeft: '40px' }}
+                            placeholder="Search…"
+                            inputProps={{ 'aria-label': 'search' }}
                         />
                     </Card>
 
@@ -79,17 +127,48 @@ const Topbar: React.FC<Props> = () => {
                             style={{marginBottom: '21px'}}
                             edge="start"
                             color="inherit"
-                            aria-label="open drawer"
+                            aria-label="open menu"
+                            aria-controls="simple-menu"
+                            aria-haspopup="true"
+                            onClick={handleClick}
                         >
-                            <Avatar
-                                style={{width: '25px', height: '25px'}}
-                            />
+                            <AccountCircle/>
                         </IconButton>
+                        <Menu
+                            id="simple-menu"
+                            anchorEl={anchorEl}
+                            keepMounted
+                            open={Boolean(anchorEl)}
+                            onClose={handleClose}
+                        >
+                            {userEmail === null &&
+                            <Typography variant="h6" gutterBottom style={{margin: "10px", color: "grey", display: "flex", justifyContent: "center"}}>
+                                Informations du compte
+                            </Typography>
+                            }
+                            { userEmail !== null &&
+                            <Typography variant="h6" gutterBottom style={{margin: "10px", color: "grey", display: "flex", justifyContent: "center"}}>
+                                {userEmail}
+                            </Typography>
+                            }
+                            <Divider variant={"middle"} style={{marginTop: "5px", marginBottom: "5px"}}/>
+
+                            <MenuItem onClick={() => {
+                                handleClose();
+                                Router.push('/profile');
+                            }}>Profil</MenuItem>
+                            <MenuItem onClick={handleClose}>My account</MenuItem>
+                            <Divider variant={"middle"} style={{marginTop: "5px", marginBottom: "5px"}}/>
+                            <MenuItem onClick={() => {
+                                handleClose();
+                                logout();
+                            }}>Se déconnecter</MenuItem>
+                        </Menu>
                     </div>
                 </Toolbar>
             </AppBar>
         </div>
     )
 }
-  
+
 export default Topbar

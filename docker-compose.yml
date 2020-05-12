@@ -6,9 +6,22 @@ services:
     ports:
       - "3000:3000"
     restart: always
+    environment:
+      NEXT_TELEMETRY_DISABLED: 1
 
-  # server:
-  #   build: ./server/
-  #   ports:
-  #     - "5000:5000"
-  #   restart: always
+  api:
+    build: ./API
+    links:
+      - db
+    ports:
+      - "5000:5000"
+    restart: always
+
+  db:
+    image: mysql:5.7
+    ports:
+      - "32000:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+    volumes:
+      - ./db:/docker-entrypoint-initdb.d/:ro
