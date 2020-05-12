@@ -13,7 +13,7 @@ const HomeCard: React.FC<Props> = ({title, addItems, favorite}) => {
     return (
         <div>
             <CardActionArea style={{marginTop: '10px'}}>
-                <Card style={{backgroundColor: '#0464a4', height: '90px', textAlign: 'left'}}>
+                <Card style={{backgroundColor: '#264E96', height: '90px', textAlign: 'left'}}>
                         <div style={{color: 'white', fontSize: '17px', fontWeight: 'bold', marginLeft: '10px', marginTop: '10px'}}>
                             {title}
                         </div>
