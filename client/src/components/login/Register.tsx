@@ -1,8 +1,12 @@
-import {Button, CircularProgress, createStyles, Divider, TextField, Typography} from "@material-ui/core";
+import {Button, CircularProgress, createStyles, Divider, Snackbar, TextField, Typography} from "@material-ui/core";
 import React, {useState} from "react";
 import {RegisterResponse} from "../../interfaces/requests";
 import {sha256} from "js-sha256";
 import {makeStyles} from "@material-ui/styles";
+import {requestLogin} from "./Login";
+import MuiAlert, {AlertProps} from "@material-ui/lab/Alert";
+
+// import Login from "./Login";
 
 const useStyles = makeStyles(createStyles({
         buttonProgress: {
@@ -19,25 +23,26 @@ interface Props {
     setDisplayRegister: (b: boolean) => void;
 }
 
-const requestRegister = async (email: string, username: string, password: string, cPassword: string) => {
-    if (email === "" || username === "" || password === "" || cPassword === "" || password != cPassword)
+function Alert(props: AlertProps) {
+    return <MuiAlert elevation={6} variant="filled" {...props} />;
+}
+
+const requestRegister = async (email: string, username: string, password: string, cPassword: string) : Promise<[boolean, string]> => {
+    if (password != cPassword)
     {
         // PROBLEME
-        return;
+        return [false, "Passwords are not the same"];
     }
 
     const headers = new Headers();
     headers.append("Content-Type", "application/json");
 
-    console.log("OK")
     const raw = JSON.stringify({
         username: username,
         email: email,
         password: password
     });
     try {
-        console.log("YESS")
-        console.log(raw)
         const response = (await (
             await fetch("http://localhost:5000/register", {
                 method: "POST",
@@ -45,19 +50,9 @@ const requestRegister = async (email: string, username: string, password: string
                 headers
             })
         ).json()) as RegisterResponse;
-        console.log(raw)
-        console.log(response)
-        if (response.success) {
-            alert("ça fonctionne");
-            // SUCCESS
-        } else {
-            alert("error connection")
-            // ERROR
-        }
+        return [response.success, response.message];
     } catch (error) {
-        // ERROR;
-        alert("error")
-        console.log(error);
+        return [false, "Connection error"]
     }
 };
 
@@ -70,6 +65,9 @@ const Register = (props: Props) => {
     const classes = useStyles();
     const timer = React.useRef<any>();
     const formValid = (username != "" && password != "" && cPassword != "" && email != "")
+    const [success, setSuccess] = useState(false);
+    const [error, setError] = useState(false);
+    const [message, setMessage] = useState("")
 
     const handleButtonClick = () => {
         if (!loading) {
@@ -78,6 +76,14 @@ const Register = (props: Props) => {
                 setLoading(false);
             }, 2000);
         }
+    };
+
+    const handleClose = (_event?: React.SyntheticEvent, reason?: string) => {
+        if (reason === 'clickaway') {
+            return;
+        }
+        setError(false)
+        setSuccess(false);
     };
 
     return (
@@ -89,7 +95,7 @@ const Register = (props: Props) => {
                     justifyContent: "space-between"
                 }}
             >
-                <Typography variant="h6" gutterBottom style={{marginBottom: "20px", color: "grey"}}>
+                <Typography variant="h6" gutterBottom style={{marginBottom: "20px", color: "grey", display: "flex", justifyContent: "center"}}>
                     Inscivez-vous à un compte
                 </Typography>
                 {loading && <CircularProgress size={48} className={classes.buttonProgress}/>}
@@ -122,20 +128,28 @@ const Register = (props: Props) => {
                 <TextField
                     required
                     className={classes.textField}
-                    id="standard-password-input"
+                    id="standard-confirm-password-input"
                     type="password"
                     label="Confirmer le mot de passe"
                     value={cPassword}
                     onChange={(sender: any) => setCPassword(sender.target.value)}
                 />
-                <div>
+                <div style={{display: "flex", justifyContent: "center"}}>
                     <Button
                         disabled={!formValid}
                         color="primary"
-                        style={{ marginTop: "20px", justifyContent: "center" }}
+                        style={{ marginTop: "20px", marginBottom: "20px", justifyContent: "center" }}
                         onClick={() => {
                             handleButtonClick();
-                            requestRegister(email, username, sha256(password), sha256(cPassword));
+                            requestRegister(email, username, sha256(password), sha256(cPassword)).then(function(value) {
+                                if (value[0]) {
+                                    setSuccess(true)
+                                    requestLogin(email, password)
+                                }
+                                else
+                                    setError(true)
+                                setMessage(value[1])
+                            })
                         }}
                     >
                         S'inscrire
@@ -151,6 +165,16 @@ const Register = (props: Props) => {
                         Vous avez déja un compte ? Connectez vous
                     </Button>
                 </div>
+                <Snackbar open={success} autoHideDuration={6000} onClose={handleClose}>
+                    <Alert onClose={handleClose} severity="success">
+                        {message}
+                    </Alert>
+                </Snackbar>
+                <Snackbar open={error} autoHideDuration={6000} onClose={handleClose}>
+                    <Alert onClose={handleClose} severity="error">
+                        {message}
+                    </Alert>
+                </Snackbar>
             </div>
         </div>
     );

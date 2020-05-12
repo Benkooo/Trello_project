@@ -5,10 +5,8 @@ import {Card} from "@material-ui/core";
 
 const LoginController = () => {
     const [displayRegister, setDisplayRegister] = useState(false);
+
     return (
-        //     {!displayRegister && (
-        //     <Login setDisplayRegister={setDisplayRegister} />
-        // )}
         <div style={{display: "flex", justifyContent: "center", marginTop: "170px"}}>
             <Card>
                 {!displayRegister && (
