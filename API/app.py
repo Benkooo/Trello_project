@@ -75,6 +75,14 @@ def add_team_members():
         return jsonify({'success': False, 'message': 'Verify team members spelling, or user already in team'})
     return jsonify({'success': True, 'message': f"Successfully added new team member{'s' if len(request.json['team_members']) > 1 else ''}"})
 
+@app.route('/get_teams', methods=['GET'])
+def get_teams():
+    if not ('logged_in' in session and session['logged_in'] and 'username' in session):
+        return jsonify({'success': False, 'message': 'Please log in'})
+    data = db.Database().get_teams(session['username'])
+    print(data)
+    return jsonify({'success': True, 'message': 'ok', 'data': data})
+
 """
 {
 team_name: "my team"

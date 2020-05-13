@@ -150,3 +150,17 @@ class Database:
             return False
         finally:
             self.connection.close()
+
+    def get_teams(self, username):
+        try:
+            user_id = Database().get_userid_from_username(username)
+            with self.connection.cursor() as cursor:
+                sql = "SELECT team_name FROM teams WHERE user_id=%s"
+                cursor.execute(sql, (user_id,))
+                result = cursor.fetchall()
+                return result
+        except:
+            return None
+        finally:
+            self.connection.close()
+        return None
