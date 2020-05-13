@@ -1,6 +1,6 @@
 import React, { useState, MouseEvent } from 'react'
 import { Typography, Grid, CardActionArea, Card } from '@material-ui/core'
-import FavoriteBorderIcon from '@material-ui/icons/FavoriteBorder';
+import StarBorderIcon from '@material-ui/icons/StarBorder';
 import PersonOutlineIcon from '@material-ui/icons/PersonOutline';
 import HomeCard from './HomeCard';
 
@@ -9,14 +9,24 @@ interface Props {
 
 const HomeBoard: React.FC<Props> = () => {
     
-    const [ favoriteItems ] = useState(Array<string>())
+    const [ favoriteItems, setFavoriteItems ] = useState(Array<string>())
 
     const addItems = (e: MouseEvent) => {
         e.preventDefault()
         const id = e.currentTarget.getAttribute("itemid")
-        const test = id as string
-        favoriteItems.push(test)
-        console.log(favoriteItems)
+        const toString = id as string
+        setFavoriteItems([
+            ...favoriteItems, toString
+        ])
+    }
+
+    const removeItems = (e: MouseEvent) => {
+        e.preventDefault()
+        const id = e.currentTarget.getAttribute("itemid")
+        const toString = id as string
+        setFavoriteItems(
+            favoriteItems.filter(item => item !== toString)
+        )
     }
 
     return (
@@ -26,17 +36,19 @@ const HomeBoard: React.FC<Props> = () => {
             maxWidth: '1200px'
         }}>
             <div style={{ display: 'flex', alignItems: 'center' }}>
-                <FavoriteBorderIcon style={{color: '#3b526f'}}/>
+                <StarBorderIcon style={{color: '#3b526f'}}/>
                 <Typography style={{fontWeight: 'bold', marginLeft: '20px', color: '#3b526f'}}>
-                    Favorite Boards
+                    Starred Boards
                 </Typography>
             </div>
             <div style={{textAlign: 'center' }}>
-                {favoriteItems.map((num) => 
-                    <p>
-                        {num}
-                    </p>
-                )}
+                <Grid container spacing={3}>
+                        {favoriteItems.map((value: string, index: number) => (
+                            <Grid key={index} item xs={4}>
+                                <HomeCard addItems={removeItems} title={value} favorite={true}/>
+                            </Grid>
+                        ))}
+                </Grid>
             </div>
 
             <div style={{ marginTop: '25px', display: 'flex', alignItems: 'center' }}>
@@ -50,16 +62,16 @@ const HomeBoard: React.FC<Props> = () => {
             <div style={{textAlign: 'center' }}>
                 <Grid container spacing={3}>
                     <Grid item xs={4}>
-                        <HomeCard addItems={addItems} title="Bistro"/>
+                        <HomeCard addItems={addItems} title="Bistro" favorite={false}/>
                     </Grid>
                     <Grid item xs={4}>
-                        <HomeCard addItems={addItems} title="Corewar"/>
+                        <HomeCard addItems={addItems} title="Corewar" favorite={false}/>
                     </Grid>
                     <Grid item xs={4}>
-                        <HomeCard addItems={addItems} title="Minishell"/>
+                        <HomeCard addItems={addItems} title="Minishell" favorite={false}/>
                     </Grid>
                     <Grid item xs={4}>
-                        <HomeCard addItems={addItems} title="Printf"/>
+                        <HomeCard addItems={addItems} title="Printf" favorite={false}/>
                     </Grid>
                     <Grid item xs={4}>
                         <CardActionArea style={{marginTop: '10px'}}>
