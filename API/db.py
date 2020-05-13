@@ -59,6 +59,33 @@ class Database:
         finally:
             self.connection.close()
 
+    def update_password(self, old_password, new_password, username):
+        try:
+            with self.connection.cursor() as cursor:
+                hashed_old = hashlib.sha256((old_password + config.SALT).encode('utf-8'))
+                hashed_new = hashlib.sha256((new_password + config.SALT).encode('utf-8'))
+                sql = "UPDATE users SET password=%s WHERE username=%s AND password=%s;"
+                cursor.execute(sql, (hashed_new.hexdigest(), username, hashed_old.hexdigest()))
+            self.connection.commit()
+            return True
+        except:
+            return False
+        finally:
+            self.connection.close()
+
+    def update_email(self, old_email, new_email, username, password):
+        try:
+            with self.connection.cursor() as cursor:
+                hashed = hashlib.sha256((password + config.SALT).encode('utf-8'))
+                sql = "UPDATE users SET email=%s WHERE email=%s AND username=%s AND password=%s;"
+                cursor.execute(sql, (new_email, old_email, username, hashed.hexdigest()))
+            self.connection.commit()
+            return True
+        except:
+            return False
+        finally:
+            self.connection.close()
+
     def check_password(self, email, password):
         try:
             with self.connection.cursor() as cursor:
