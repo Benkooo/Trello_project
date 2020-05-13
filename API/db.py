@@ -46,6 +46,19 @@ class Database:
         finally:
             self.connection.close()
 
+    def update_username(self, old_username, new_username, password):
+        try:
+            with self.connection.cursor() as cursor:
+                hashed = hashlib.sha256((password + config.SALT).encode('utf-8'))
+                sql = "UPDATE users SET username=%s WHERE username=%s AND password=%s;"
+                cursor.execute(sql, (new_username, old_username, hashed.hexdigest()))
+            self.connection.commit()
+            return True
+        except:
+            return False
+        finally:
+            self.connection.close()
+
     def check_password(self, email, password):
         try:
             with self.connection.cursor() as cursor:
@@ -151,16 +164,33 @@ class Database:
         finally:
             self.connection.close()
 
+    def get_usernames_from_teams_unique_id(self, unique_id):
+        try:
+            with self.connection.cursor() as cursor:
+                sql = "SELECT username FROM teams JOIN users ON users.id = teams.user_id WHERE unique_id=%s"
+                cursor.execute(sql, (unique_id,))
+                result = cursor.fetchall()
+                return result
+        except:
+            return []
+        finally:
+            self.connection.close()
+        return []
+
     def get_teams(self, username):
         try:
             user_id = Database().get_userid_from_username(username)
             with self.connection.cursor() as cursor:
-                sql = "SELECT team_name FROM teams WHERE user_id=%s"
+                sql = "SELECT team_name, unique_id FROM teams WHERE user_id=%s"
                 cursor.execute(sql, (user_id,))
                 result = cursor.fetchall()
+                for elem in result:
+                    elem['usernames'] = Database().get_usernames_from_teams_unique_id(elem['unique_id'])
+                    del elem['unique_id']
+                    elem['usernames'] = [_['username'] for _ in elem['usernames']]
                 return result
         except:
-            return None
+            return []
         finally:
             self.connection.close()
-        return None
+        return []
