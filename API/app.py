@@ -39,7 +39,7 @@ def login():
         session['username'] = db.Database().get_username_from_email(request.json['email'])
         return jsonify({'success': True, 'message': 'Successfully logged in'})
     else:
-        return jsonify({'success': False, 'message': 'username or password is false'})
+        return jsonify({'success': False, 'message': 'username or password is false', 'username': session['username']})
 
 @app.route('/logout', methods=['POST'])
 def logout():
@@ -52,13 +52,13 @@ def logout():
 def update_username():
     if not ('logged_in' in session and session['logged_in'] and 'username' in session):
         return jsonify({'success': False, 'message': 'Please log in'})
-    if not all(_ in request.json for _ in ('old_username', 'new_username', 'password')):
+    if not all(_ in request.json for _ in ('old_username', 'new_username')):
         return jsonify({'success': False, 'message': 'Please provide all informations'})
     if session['username'] != request.json['old_username']:
         return jsonify({'success': False, 'message': 'Incorrect username'})
     if request.json['old_username'] == request.json['new_username']:
         return jsonify({'success': False, 'message': 'Usernames are the same'})
-    if db.Database().update_username(request.json['old_username'], request.json['new_username'], request.json['password']):
+    if db.Database().update_username(request.json['old_username'], request.json['new_username']):
         session['username'] = request.json['new_username']
         return jsonify({'success': True, 'message': 'Successfully updated username'})
     return jsonify({'success': False, 'message': "Could not update username"})
@@ -81,13 +81,13 @@ def update_password():
 def update_email():
     if not ('logged_in' in session and session['logged_in'] and 'username' in session):
         return jsonify({'success': False, 'message': 'Please log in'})
-    if not all(_ in request.json for _ in ('old_email', 'new_email', 'username', 'password')):
+    if not all(_ in request.json for _ in ('old_email', 'new_email', 'username')):
         return jsonify({'success': False, 'message': 'Please provide all informations'})
     if session['username'] != request.json['username']:
         return jsonify({'success': False, 'message': 'Incorrect username'})
     if request.json['old_email'] == request.json['new_email']:
         return jsonify({'success': False, 'message': 'Emails are the same'})
-    if db.Database().update_email(request.json['old_email'], request.json['new_email'], request.json['username'], request.json['password']):
+    if db.Database().update_email(request.json['old_email'], request.json['new_email'], request.json['username']):
         return jsonify({'success': True, 'message': 'Successfully updated email'})
     return jsonify({'success': False, 'message': "Could not update email"})
 
