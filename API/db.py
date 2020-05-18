@@ -138,6 +138,19 @@ class Database:
             self.connection.close()
         return False
 
+    def _get_teams_unique_id(self, team_name, user_id):
+        try:
+            with self.connection.cursor() as cursor:
+                sql = "SELECT unique_id FROM teams WHERE team_name=%s AND user_id=%s"
+                cursor.execute(sql, (team_name, user_id))
+                result = cursor.fetchone()
+                return result['unique_id']
+        except:
+            return None
+        finally:
+            self.connection.close()
+        return None
+
     def team_name_exists(self, team_name):
         try:
             with self.connection.cursor() as cursor:
@@ -220,36 +233,152 @@ class Database:
             self.connection.close()
         return []
 
+    def url_exists(self, url):
+        try:
+            with self.connection.cursor() as cursor:
+                sql = "SELECT id FROM boards WHERE url=%s"
+                cursor.execute(sql, (url,))
+                result = cursor.fetchone()
+                return 'id' in result
+        except:
+            return False
+        finally:
+            self.connection.close()
+        return False
 
-    """
-CREATE TABLE IF NOT EXISTS user_boards (
-    id int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    board_id int(11) NOT NULL,
-    unique_id varchar(255) COLLATE utf8_bin NOT NULL,
-    team BIT,
-    starred BIT
-);
+    def generate_url(self):
+        url = ''.join(random.SystemRandom().choice(string.ascii_uppercase + string.digits) for _ in range(20))
+        while Database().url_exists(url):
+            url = ''.join(random.SystemRandom().choice(string.ascii_uppercase + string.digits) for _ in range(20))
+        return url
 
+    def _new_board(self, board_name, backgroud_pic):
+        try:
+            url = self.generate_url()
+            board_id = 0
+            with self.connection.cursor() as cursor:
+                sql = "INSERT INTO boards (board_name, backgroud_pic, url) VALUES (%s, %s, %s)"
+                cursor.execute(sql, (board_name, backgroud_pic, url))
+                board_id = cursor.lastrowid
 
-CREATE TABLE IF NOT EXISTS boards (
-    id int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    board_name varchar(255) COLLATE utf8_bin NOT NULL,
-    backgroud_pic varchar(255) COLLATE utf8_bin,
-    url varchar(255) UNIQUE COLLATE utf8_bin NOT NULL
-);
+            self.connection.commit()
+            return board_id
+        finally:
+            self.connection.close()
+
+    def new_personal(self, user_id, unique_id):
+        try:
+            with self.connection.cursor() as cursor:
+                sql = "INSERT INTO personal (user_id, unique_id) VALUES (%s, %s)"
+                cursor.execute(sql, (user_id, unique_id))
+
+            self.connection.commit()
+            return True
+        except:
+            return False
+        finally:
+            self.connection.close()
+
+    def _new_userboard(self, board_id, unique_id, team, starred):
+        try:
+            with self.connection.cursor() as cursor:
+                sql = "INSERT INTO user_boards (board_id, unique_id, team, starred) VALUES (%s, %s, %s, %s)"
+                cursor.execute(sql, (board_id, unique_id, team, starred))
+
+            self.connection.commit()
+            return True
+        except:
+            return False
+        finally:
+            self.connection.close()
+
+    def create_board(self, team_name, board_name, backgroud_pic, username):
+        try:
+            board_id = Database()._new_board(board_name, backgroud_pic)
+            user_id = Database().get_userid_from_username(username)
+            if team_name == '':
+                unique_id = ''.join(random.SystemRandom().choice(string.ascii_uppercase + string.digits) for _ in range(200))
+                if not Database().new_personal(user_id, unique_id):
+                    raise Exception("cannot create new personal field")
+                if not Database()._new_userboard(board_id, unique_id, False, False):
+                    raise Exception("cannot create new board")
+            else:
+                unique_id = Database()._get_teams_unique_id(team_name, user_id)###essayer!!!
+                if not Database()._new_userboard(board_id, unique_id, True, False):
+                    raise Exception("cannot create new board")
+        except:
+            return False
+        finally:
+            self.connection.close()
+
+    def _get_personal_members(self, unique_id):
+        try:
+            with self.connection.cursor() as cursor:
+                sql = "SELECT username FROM personal JOIN users ON users.id = personal.user_id WHERE unique_id=%s"
+                cursor.execute(sql, (unique_id,))
+                result = cursor.fetchall()
+                return [elem['username'] for elem in result]
+        finally:
+            self.connection.close()
+
+    def _get_unique_ids_and_members(self, username):
+        try:
+            user_id = Database().get_userid_from_username(username)
+            with self.connection.cursor() as cursor:
+                sql = "SELECT unique_id FROM personal WHERE user_id=%s"
+                cursor.execute(sql, (user_id,))
+                result = cursor.fetchall()
+                ret = []
+                for elem in result:
+                    tmp = {'members': Database()._get_personal_members(elem['unique_id']), 'unique_id': elem['unique_id']}
+                    ret.append(tmp)
+                """for elem in result:
+                    elem['usernames'] = Database().get_usernames_from_teams_unique_id(elem['unique_id'])
+                    del elem['unique_id']
+                    elem['usernames'] = [_['username'] for _ in elem['usernames']]"""
+                return ret
+        except:
+            return []
+        finally:
+            self.connection.close()
+        return []
+
+    def get_personal_boards(self, username):
+        return Database()._get_unique_ids_and_members(username)
+        """try:
+            user_id = Database().get_userid_from_username(username)
+            with self.connection.cursor() as cursor:
+                sql = "SELECT unique_id FROM personal WHERE user_id=%s"
+                cursor.execute(sql, (user_id,))
+                result = cursor.fetchall()
+                return result
+        except:
+            return []
+        finally:
+            self.connection.close()
+        return []"""
+
 
 """
-    def new_board(self):
-        ##dans boards:
-        #ajouter le nom
-        #backgroud_pic
-        #generer un url unique
-
-        ##dans user_boards:
-        ##si c'est une team: get le unique_id de la team
-        ##si c'est perso, creer un unique_id
-        ##pour chaque user:
-        ##prendre le unique_id de la board creer
-        ##set le champ team et starred
-        ##garder le meme unique_id
-        pass
+{
+    team_boards: [
+        {
+            team_name: 'super_name'
+            team_members: ['user1, user2'],
+            boards: [
+                board_name: 'test',
+                starred: False
+            ]
+        }
+    ],
+    personal_boards: [
+        {
+            board_name: 'test',
+            board_members: ['user1, user2'],
+            backgroud_pic: 'localhost:5000/images/test.jpg',
+            a
+            starred: False
+        }
+    ]
+}
+"""

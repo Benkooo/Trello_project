@@ -37,9 +37,9 @@ def login():
     if my_db.check_password(request.json['email'], request.json['password']):
         session['logged_in'] = True
         session['username'] = db.Database().get_username_from_email(request.json['email'])
-        return jsonify({'success': True, 'message': 'Successfully logged in'})
+        return jsonify({'success': True, 'message': 'Successfully logged in', 'username': session['username']})
     else:
-        return jsonify({'success': False, 'message': 'username or password is false', 'username': session['username']})
+        return jsonify({'success': False, 'message': 'username or password is false'})
 
 @app.route('/logout', methods=['POST'])
 def logout():
@@ -173,19 +173,20 @@ def add_board():
     if (request.json['team_name'] != '') and (not db.Database().team_name_exists(request.json['team_name'])):
         return jsonify({'success': False, 'message': "The team name doesn't exists"})
 
+    db.Database().create_board(request.json['team_name'], request.json['board_name'], './static/abcd.jpeg', session['username'])
     return jsonify({'success': True, 'message': 'Successfully added new board'})
 
-@app.route('/<username>/boards', methods=['POST'])
-def boards(username):
-    print(username)
-    if 'logged_in' in session and session['logged_in'] and 'username' in session:
-        if username == session['username']:
-            print('username in session!!!')
-            return jsonify({'success': True, 'message': 'ok'})
-        else:
-            return jsonify({'success': False, 'message': 'Access not allowed'})
-    print('not logged in!')
-    return jsonify({'success': False, 'message': 'You are not logged in'})
+@app.route('/get_personal_boards', methods=['GET'])
+def boards():
+    if not ('logged_in' in session and session['logged_in'] and 'username' in session):
+        return jsonify({'success': False, 'message': 'Please log in'})
+    data = db.Database().get_personal_boards(session['username'])
+    return jsonify({'success': True, 'message': 'ok', 'data': data})
+
+
+
+
+
 
 @app.route('/add_list', methods=['POST'])
 def add_list():
