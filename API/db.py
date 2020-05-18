@@ -46,12 +46,11 @@ class Database:
         finally:
             self.connection.close()
 
-    def update_username(self, old_username, new_username, password):
+    def update_username(self, old_username, new_username):
         try:
             with self.connection.cursor() as cursor:
-                hashed = hashlib.sha256((password + config.SALT).encode('utf-8'))
-                sql = "UPDATE users SET username=%s WHERE username=%s AND password=%s;"
-                cursor.execute(sql, (new_username, old_username, hashed.hexdigest()))
+                sql = "UPDATE users SET username=%s WHERE username=%s;"
+                cursor.execute(sql, (new_username, old_username))
             self.connection.commit()
             return True
         except:
@@ -73,12 +72,11 @@ class Database:
         finally:
             self.connection.close()
 
-    def update_email(self, old_email, new_email, username, password):
+    def update_email(self, old_email, new_email, username):
         try:
             with self.connection.cursor() as cursor:
-                hashed = hashlib.sha256((password + config.SALT).encode('utf-8'))
-                sql = "UPDATE users SET email=%s WHERE email=%s AND username=%s AND password=%s;"
-                cursor.execute(sql, (new_email, old_email, username, hashed.hexdigest()))
+                sql = "UPDATE users SET email=%s WHERE email=%s AND username=%s;"
+                cursor.execute(sql, (new_email, old_email, username))
             self.connection.commit()
             return True
         except:
@@ -221,3 +219,37 @@ class Database:
         finally:
             self.connection.close()
         return []
+
+
+    """
+CREATE TABLE IF NOT EXISTS user_boards (
+    id int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    board_id int(11) NOT NULL,
+    unique_id varchar(255) COLLATE utf8_bin NOT NULL,
+    team BIT,
+    starred BIT
+);
+
+
+CREATE TABLE IF NOT EXISTS boards (
+    id int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    board_name varchar(255) COLLATE utf8_bin NOT NULL,
+    backgroud_pic varchar(255) COLLATE utf8_bin,
+    url varchar(255) UNIQUE COLLATE utf8_bin NOT NULL
+);
+
+"""
+    def new_board(self):
+        ##dans boards:
+        #ajouter le nom
+        #backgroud_pic
+        #generer un url unique
+
+        ##dans user_boards:
+        ##si c'est une team: get le unique_id de la team
+        ##si c'est perso, creer un unique_id
+        ##pour chaque user:
+        ##prendre le unique_id de la board creer
+        ##set le champ team et starred
+        ##garder le meme unique_id
+        pass

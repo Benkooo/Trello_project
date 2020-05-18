@@ -9,7 +9,7 @@ const useStyles = makeStyles(
         '@global': {
             body: {
                 margin: 0,
-                background: "white"
+                background: "#0079BF"
             }
         },
         root: {
