@@ -7,13 +7,22 @@ import ExpandLess from '@material-ui/icons/ExpandLess';
 import ExpandMore from '@material-ui/icons/ExpandMore';
 import AddIcon from '@material-ui/icons/Add';
 
+import './CreateTeamDialog'
+import CreateTeamDialog from './CreateTeamDialog';
+
 interface Props {
 }
 
 const HomeList: React.FC<Props> = () => {
     const [open, setOpen] = useState(true)
+    const [openTeam, setOpenTeam] = useState(false)
+
     const handleClick = () => {
         setOpen(!open)
+    }
+
+    const handleOpenTeam = () => {
+        setOpenTeam(!openTeam)
     }
 
     return (
@@ -39,7 +48,9 @@ const HomeList: React.FC<Props> = () => {
                     <ListItemText primaryTypographyProps={{ style: {fontWeight: 'bold', color: '#7f8da1' , fontSize: '13px'} }} primary="TEAMS" />
                     { open ? <ExpandLess style={{color: '#7f8da1', height: '20px'}} /> : <ExpandMore style={{ color: '#7f8da1', height: '20px' }} />}
                 </ListItem>
-                <IconButton style={{position: 'absolute', marginBottom: '100px', marginTop: '-42px', marginLeft: '270px'}}>
+                <IconButton 
+                onClick={handleOpenTeam}
+                style={{position: 'absolute', marginBottom: '100px', marginTop: '-42px', marginLeft: '270px'}}>
                     <AddIcon style={{color: '#7f8da1', height: '20px'}}/>
                 </IconButton>
                 <Collapse in={open} timeout="auto" unmountOnExit>
@@ -59,6 +70,7 @@ const HomeList: React.FC<Props> = () => {
                     </List>
                 </Collapse>
             </List>
+            <CreateTeamDialog open={openTeam} handleClose={handleOpenTeam}/>
         </div>
     )
 }

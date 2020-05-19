@@ -1,7 +1,7 @@
 import React from "react";
 import Typography from "@material-ui/core/Typography";
 import Board from "../components/board/Board";
-import Topbar from "../components/Topbar";
+import Topbar from "../components/topbar/Topbar";
 
 const BoardPage = () => {
     return (

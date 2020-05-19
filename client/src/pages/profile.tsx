@@ -1,4 +1,4 @@
-import Topbar from '../components/Topbar'
+import Topbar from "../components/topbar/Topbar";
 // import {makeStyles} from "@material-ui/styles";
 // import {useStyles} from '@material-ui/core'
 import {Box, Paper, Tab, Tabs, Typography} from "@material-ui/core";

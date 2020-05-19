@@ -1,5 +1,5 @@
 import React from 'react'
-import Topbar from '../components/Topbar'
+import Topbar from "../components/topbar/Topbar";
 import {makeStyles} from "@material-ui/styles";
 import {createStyles} from "@material-ui/core";
 import HomeList from '../components/home/HomeList';
