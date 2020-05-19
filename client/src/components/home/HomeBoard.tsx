@@ -3,6 +3,7 @@ import { Typography, Grid, CardActionArea, Card } from '@material-ui/core'
 import StarBorderIcon from '@material-ui/icons/StarBorder';
 import PersonOutlineIcon from '@material-ui/icons/PersonOutline';
 import HomeCard from './HomeCard';
+import CreateBoard from '../utils/CreateBoard';
 
 interface Props {
 }
@@ -10,6 +11,15 @@ interface Props {
 const HomeBoard: React.FC<Props> = () => {
     
     const [ favoriteItems, setFavoriteItems ] = useState(Array<string>())
+    const [ open, setOpen ] = useState(false)
+
+    const handleClickOpen = () => {
+        setOpen(true)
+    }
+
+    const handleClose = () => {
+        setOpen(false)
+    }
 
     const addItems = (e: MouseEvent) => {
         e.preventDefault()
@@ -74,12 +84,13 @@ const HomeBoard: React.FC<Props> = () => {
                         <HomeCard addItems={addItems} title="Printf" favorite={false}/>
                     </Grid>
                     <Grid item xs={4}>
-                        <CardActionArea style={{marginTop: '10px'}}>
+                        <CardActionArea style={{marginTop: '10px'}} onClick={handleClickOpen}>
                             <Card style={{display: 'flex', justifyContent: 'center', alignItems: 'center',height: '90px' }}>
                                 Create new board
                             </Card>
                         </CardActionArea>
                     </Grid>
+                    <CreateBoard open={open} handleClose={handleClose}/>
                 </Grid>
             </div>
         </div>

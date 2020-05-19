@@ -1,10 +1,11 @@
 import React, {useState} from 'react'
-import {Menu, ListItemText, Collapse, List, ListItem, TextField, Typography, CardActionArea} from '@material-ui/core'
+import {Menu, ListItemText, Collapse, List, ListItem, TextField, Typography } from '@material-ui/core'
 import StarBorderIcon from '@material-ui/icons/StarBorder';
 import ExpandLess from '@material-ui/icons/ExpandLess';
 import ExpandMore from '@material-ui/icons/ExpandMore';
 import PersonOutlineIcon from '@material-ui/icons/PersonOutline';
 import BoardListItem from './BoardListItem';
+import CreateBoard from '../utils/CreateBoard';
 
 interface Props {
     anchorEl: any,
@@ -17,6 +18,16 @@ const TopbarBoardList: React.FC<Props> = ({
 
     const [open, setOpen ] = useState(true)
     const [openPerso, setOpenPerso] = useState(true)
+    const [ openCreateBoard, setOpenCreateBoard ] = useState(false)
+
+    const handleClickOpenCreateBoard = () => {
+        setOpenCreateBoard(true)
+    }
+
+    const handleCloseCreateBoard = () => {
+        setOpenCreateBoard(false)
+    }
+
     const handleClick = () => {
         setOpen(!open)
     }
@@ -67,11 +78,12 @@ const TopbarBoardList: React.FC<Props> = ({
                                     <BoardListItem />
                                 </List>
                             </Collapse>
-                            <ListItem button style={{marginTop: '5px', borderRadius: '4px'}}>
+                            <ListItem button onClick={handleClickOpenCreateBoard} style={{marginTop: '5px', borderRadius: '4px'}}>
                                 <Typography style={{fontSize: '13px', marginLeft: '25px'}} variant="subtitle2">
                                     Create new board...
                                 </Typography>
                             </ListItem>
+                            <CreateBoard open={openCreateBoard} handleClose={handleCloseCreateBoard}/>
                         </List>
                     </div>
                 </div>

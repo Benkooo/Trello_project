@@ -20,7 +20,8 @@ const CreateTeamDialog: React.FC<Props> = ({
     
     const [teamName, setTeamName] = useState('')
     const [teamDescription, setTeamDescription] = useState('')
-    
+    const isEmpty = !(teamName && teamDescription) as boolean
+
     const postTeam = () => {
         console.log("TEAM ADDED")
         axios.post('http://localhost:5000/add_team', {
@@ -75,7 +76,7 @@ const CreateTeamDialog: React.FC<Props> = ({
                     }} variant="contained">
                         Cancel
                     </Button>
-                    <Button style={{textTransform: 'none', backgroundColor: '#61BD4F', marginRight: '18px'}} onClick={postTeam} variant="contained" color="primary">
+                    <Button disabled={isEmpty} style={{textTransform: 'none', backgroundColor: '#61BD4F', marginRight: '18px'}} onClick={postTeam} variant="contained" color="primary">
                         Continue
                     </Button>
                 </DialogActions>
