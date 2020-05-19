@@ -154,33 +154,29 @@ def remove_team_member():
     return jsonify({'success': True, 'message': 'Successfully removed team member'})
 
 
-
-
-"""
-{
-board_name: "test",
-team_name: "" -> si chaine vide c'est une board perso, sinon en team
-"""
 @app.route('/add_board', methods=['POST'])
 def add_board():
     if not ('logged_in' in session and session['logged_in'] and 'username' in session):
         return jsonify({'success': False, 'message': 'Please log in'})
-    if not all(_ in request.json for _ in ('board_name', 'team_name')):
+    if not all(_ in request.json for _ in ('board_name', 'team_name', 'backgroud_pic')):
         return jsonify({'success': False, 'message': 'Please provide all informations'})
-    print(session['username'])
-    print(request.json['board_name'])
-    print(request.json['team_name'])
     if (request.json['team_name'] != '') and (not db.Database().team_name_exists(request.json['team_name'])):
         return jsonify({'success': False, 'message': "The team name doesn't exists"})
-
-    db.Database().create_board(request.json['team_name'], request.json['board_name'], './static/abcd.jpeg', session['username'])
+    db.Database().create_board(request.json['team_name'], request.json['board_name'], request.json['backgroud_pic'], session['username'])
     return jsonify({'success': True, 'message': 'Successfully added new board'})
 
 @app.route('/get_personal_boards', methods=['GET'])
-def boards():
+def get_personal_boards():
     if not ('logged_in' in session and session['logged_in'] and 'username' in session):
         return jsonify({'success': False, 'message': 'Please log in'})
     data = db.Database().get_personal_boards(session['username'])
+    return jsonify({'success': True, 'message': 'ok', 'data': data})
+
+@app.route('/get_team_boards', methods=['GET'])
+def get_team_boards():
+    if not ('logged_in' in session and session['logged_in'] and 'username' in session):
+        return jsonify({'success': False, 'message': 'Please log in'})
+    data = db.Database().get_team_boards(session['username'])
     return jsonify({'success': True, 'message': 'ok', 'data': data})
 
 

@@ -33,13 +33,6 @@ class Database:
                 cursor.execute(sql, (username, email, hashed.hexdigest()))
 
             self.connection.commit()
-
-            with self.connection.cursor() as cursor:
-                # Read a single record
-                sql = "SELECT id, password FROM users WHERE email=%s"
-                cursor.execute(sql, (email,))
-                result = cursor.fetchone()
-                print(result)
             return True
         except:
             return False
@@ -179,7 +172,6 @@ class Database:
         return False
 
     def add_team(self, team_name, team_members, unique_id=''.join(random.SystemRandom().choice(string.ascii_uppercase + string.digits) for _ in range(200))):
-        print(team_members)
         team_members = list(set(team_members))
         try:
             data = []
@@ -321,64 +313,87 @@ class Database:
         finally:
             self.connection.close()
 
-    def _get_unique_ids_and_members(self, username):
+    def _get_team_members(self, unique_id):
+        try:
+            with self.connection.cursor() as cursor:
+                sql = "SELECT username FROM teams JOIN users ON users.id = teams.user_id WHERE unique_id=%s"
+                cursor.execute(sql, (unique_id,))
+                result = cursor.fetchall()
+                return [elem['username'] for elem in result]
+        finally:
+            self.connection.close()
+
+    def _get_unique_ids_and_members(self, username, personal):
         try:
             user_id = Database().get_userid_from_username(username)
             with self.connection.cursor() as cursor:
-                sql = "SELECT unique_id FROM personal WHERE user_id=%s"
+                sql = "SELECT unique_id FROM personal WHERE user_id=%s" if personal else "SELECT unique_id, team_name FROM teams WHERE user_id=%s"
                 cursor.execute(sql, (user_id,))
                 result = cursor.fetchall()
                 ret = []
-                for elem in result:
-                    tmp = {'members': Database()._get_personal_members(elem['unique_id']), 'unique_id': elem['unique_id']}
-                    ret.append(tmp)
-                """for elem in result:
-                    elem['usernames'] = Database().get_usernames_from_teams_unique_id(elem['unique_id'])
-                    del elem['unique_id']
-                    elem['usernames'] = [_['username'] for _ in elem['usernames']]"""
+                if personal:
+                    for elem in result:
+                        tmp = {'members': Database()._get_personal_members(elem['unique_id']), 'unique_id': elem['unique_id']}
+                        ret.append(tmp)
+                else:
+                    for elem in result:
+                        tmp = {'members': Database()._get_team_members(elem['unique_id']), 'unique_id': elem['unique_id'], 'team_name': elem['team_name']}
+                        ret.append(tmp)
                 return ret
         except:
             return []
         finally:
             self.connection.close()
-        return []
 
-    def get_personal_boards(self, username):
-        return Database()._get_unique_ids_and_members(username)
-        """try:
-            user_id = Database().get_userid_from_username(username)
+    def _get_user_board_personal_from_unique_id(self, unique_id):
+        try:
             with self.connection.cursor() as cursor:
-                sql = "SELECT unique_id FROM personal WHERE user_id=%s"
-                cursor.execute(sql, (user_id,))
-                result = cursor.fetchall()
+                sql = "SELECT starred, backgroud_pic, board_name FROM user_boards JOIN boards ON boards.id = user_boards.board_id WHERE unique_id=%s AND team=%s"
+                cursor.execute(sql, (unique_id, False))
+                result = cursor.fetchone()
                 return result
-        except:
-            return []
         finally:
             self.connection.close()
-        return []"""
 
+    def get_personal_boards(self, username):
+        try:
+            data = Database()._get_unique_ids_and_members(username, personal=True)
+            ret = []
+            for elem in data:
+                res = Database()._get_user_board_personal_from_unique_id(elem['unique_id'])
+                tmp = {
+                    'members': elem['members'],
+                    'starred': False if res['starred'] == b'\x00' else True,
+                    'backgroud_pic': res['backgroud_pic'],
+                    'board_name': res['board_name']
+                }
+                ret.append(tmp)
+            return ret
+        except:
+            return []
 
-"""
-{
-    team_boards: [
-        {
-            team_name: 'super_name'
-            team_members: ['user1, user2'],
-            boards: [
-                board_name: 'test',
-                starred: False
-            ]
-        }
-    ],
-    personal_boards: [
-        {
-            board_name: 'test',
-            board_members: ['user1, user2'],
-            backgroud_pic: 'localhost:5000/images/test.jpg',
-            a
-            starred: False
-        }
-    ]
-}
-"""
+    def _get_user_board_team_from_unique_id(self, unique_id):
+        try:
+            with self.connection.cursor() as cursor:
+                sql = "SELECT starred, backgroud_pic, board_name FROM user_boards JOIN boards ON boards.id = user_boards.board_id WHERE unique_id=%s AND team=%s"
+                cursor.execute(sql, (unique_id, True))
+                result = cursor.fetchall()
+                return result
+        finally:
+            self.connection.close()
+
+    def get_team_boards(self, username):
+        try:
+            data = Database()._get_unique_ids_and_members(username, personal=False)
+            ret = []
+            for elem in data:
+                res = Database()._get_user_board_team_from_unique_id(elem['unique_id'])
+                tmp = {
+                    'members': elem['members'],
+                    'boards': [{'starred': False if board['starred'] == b'\x00' else True, 'backgroud_pic': board['backgroud_pic'], 'board_name': board['board_name']} for board in res],
+                    'team_name': elem['team_name']
+                }
+                ret.append(tmp)
+            return ret
+        except:
+            return []
