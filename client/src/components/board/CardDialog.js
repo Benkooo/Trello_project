@@ -57,9 +57,12 @@ export default class CardDialog extends React.Component{
     }
 
     render() {
+
+        console.log("LES PROPIPROPS : ", this.props)
+
         return (
-            <Dialog onClose={this.props.handleClose()} aria-labelledby="customized-dialog-title" open={this.props.open}>
-                <DialogTitle id="customized-dialog-title" onClose={this.props.handleClose()}>
+            <Dialog onClose={this.props.handleClose} aria-labelledby="customized-dialog-title" open={this.props.open}>
+                <DialogTitle id="customized-dialog-title">
                     Modal title
                 </DialogTitle>
                 <DialogContent dividers>
@@ -78,7 +81,7 @@ export default class CardDialog extends React.Component{
                     </Typography>
                 </DialogContent>
                 <DialogActions>
-                    <Button autoFocus onClick={this.props.handleClose()} color="primary">
+                    <Button autoFocus onClick={this.props.handleClose} color="primary">
                         Save changes
                     </Button>
                 </DialogActions>

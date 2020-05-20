@@ -89,7 +89,10 @@ export default class BoardColumn extends React.Component {
         this.setState({open: true});
     };
 
-    _handleClose() {
+    handleClose = () => {
+        this.setState({
+            open: false
+        })
         console.log("CLOOOOOOSE DIALOG")
     };
 
@@ -115,7 +118,7 @@ export default class BoardColumn extends React.Component {
         console.log(this.state.edit);
         return(
             <div>
-            <CardDialog open={this.state.open} handleClose={this._handleClose}/>
+            <CardDialog open={this.state.open} handleClose={this.handleClose}/>
             <Card ref={this.props.provided.innerRef}
                   style={getListStyle(this.props.snapshot.isDraggingOver)} {...this.props.provided.droppableProps}>
                 <div style={{

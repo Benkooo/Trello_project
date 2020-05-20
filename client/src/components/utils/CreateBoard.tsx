@@ -23,7 +23,7 @@ const CreateBoard: React.FC<Props> = ({
                 <DialogTitle id="form-dialog-title">Create your Board</DialogTitle>
                 <DialogContent>
                     <DialogContentText>
-                    Add a title, a team and a color to your Board, and unleash your team's boundless productivity potential!
+                        Add a title, a team and a color to your Board, and unleash your team's boundless productivity potential!
                     </DialogContentText>
                     <TextField
                         autoFocus
