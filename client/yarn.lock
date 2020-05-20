@@ -4976,6 +4976,11 @@ react-edit-inline@^1.0.8:
   resolved "https://registry.yarnpkg.com/react-edit-inline/-/react-edit-inline-1.0.8.tgz#d144670b5217b5adc6c5bcb6976fc6b257f09b72"
   integrity sha1-0URnC1IXta3Gxby2l2/Gslfwm3I=
 
+react-editext@^3.15.1:
+  version "3.15.1"
+  resolved "https://registry.yarnpkg.com/react-editext/-/react-editext-3.15.1.tgz#feb837fca07ca02dea41ab99bd4178fbb85da768"
+  integrity sha512-Xbo4OnhD4Rmr2usMDSccDeuTg3pwuI0Us36UZDrCYKIMWQc3rQUhhj6Lni8Ns1jSnlCbim9C6gyxeHNlZ+2PVg==
+
 react-inline-editing@^1.0.10:
   version "1.0.10"
   resolved "https://registry.yarnpkg.com/react-inline-editing/-/react-inline-editing-1.0.10.tgz#0e2b89c03f8506e8d02feccf66a658dd809a8dfd"
