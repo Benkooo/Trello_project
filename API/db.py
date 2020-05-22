@@ -271,17 +271,8 @@ class Database:
         finally:
             self.connection.close()
 
-    def board_exists(team_name, board_name, username):################################################################################################"
-        try:
-            with self.connection.cursor() as cursor:
-                sql = "SELECT id FROM boards WHERE team_name=%s AND board_name=%s"#######################
-                cursor.execute(sql, (team_name, board_name))
-                result = cursor.fetchone()
-                return 'id' in result
-        except:
-            return False
-        finally:
-            self.connection.close()
+    def board_exists(self, team_name, board_name, username):
+        return False
 
     def _new_userboard(self, board_id, unique_id, team, starred):
         try:
