@@ -182,15 +182,32 @@ def get_team_boards():
     data = db.Database().get_team_boards(session['username'])
     return jsonify({'success': True, 'message': 'ok', 'data': data})
 
+@app.route('/<url>/change_board_data', methods=['POST'])
+def change_board_data(url):
+    if not ('logged_in' in session and session['logged_in'] and 'username' in session):
+        return jsonify({'success': False, 'message': 'Please log in'})
+    if not all(_ in request.json for _ in ('json',)):
+        return jsonify({'success': False, 'message': 'Please provide all informations'})
+    if not db.Database().change_board_data(url, request.json['json']):
+        return jsonify({'success': False, 'message': "Could not change board informations"})
+    return jsonify({'success': True, 'message': 'Successfully changed board informations'})
+
+@app.route('/<url>/get_board_data', methods=['POST'])
+def get_board_data(url):
+    if not ('logged_in' in session and session['logged_in'] and 'username' in session):
+        return jsonify({'success': False, 'message': 'Please log in'})
+    return jsonify({'success': True, 'message': 'ok', 'data': db.Database().get_board_data(url)})
 
 
 
 
 
-@app.route('/add_list', methods=['POST'])
+
+
+"""@app.route('/add_list', methods=['POST'])
 def add_list():
     print('adding list')
-    return jsonify({'success': True, 'message': 'Successfully added list'})
+    return jsonify({'success': True, 'message': 'Successfully added list'})"""
 
 """
 {
@@ -201,7 +218,8 @@ def add_list():
   column_name: "First_column"
 }
 """
-@app.route('/add_card', methods=['POST'])
+
+"""@app.route('/add_card', methods=['POST'])
 def add_card():
     print(request.json)
     return jsonify({'success': True, 'message': 'Successfully added card'})
@@ -211,7 +229,7 @@ def modify_card(card_id):
     print(card_id)
     print(request.json)
     return jsonify({'success': True, 'message': 'Successfully modified card'})
-
+"""
 if __name__ == "__main__":
     app.run(host=config.FLASK_HOST,
             port=config.FLASK_PORT,

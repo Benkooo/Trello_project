@@ -42,3 +42,9 @@ CREATE TABLE IF NOT EXISTS labels (
     text varchar(255) COLLATE utf8_bin NOT NULL,
     board_id int(11) NOT NULL
 );
+
+CREATE TABLE IF NOT EXISTS board_data (
+    id int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    board_id int(11) UNIQUE NOT NULL,
+    json varchar(255) COLLATE utf8_bin NOT NULL
+);

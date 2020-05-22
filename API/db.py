@@ -5,6 +5,8 @@ import hashlib
 import random
 import string
 
+import json
+
 class Database:
     def __init__(self):
         self.init_connection()
@@ -103,7 +105,6 @@ class Database:
             return None
         finally:
             self.connection.close()
-        return None
 
     def get_userid_from_username(self, username):
         try:
@@ -271,8 +272,17 @@ class Database:
         finally:
             self.connection.close()
 
-    def board_exists(self, team_name, board_name, username):
-        return False
+    def board_exists(self, team_name, board_name, username):################################################################################################"
+        try:
+            with self.connection.cursor() as cursor:
+                sql = "SELECT id FROM boards WHERE team_name=%s AND board_name=%s"#######################
+                cursor.execute(sql, (team_name, board_name))
+                result = cursor.fetchone()
+                return 'id' in result
+        except:
+            return False
+        finally:
+            self.connection.close()
 
     def _new_userboard(self, board_id, unique_id, team, starred):
         try:
@@ -327,8 +337,7 @@ class Database:
             for label in labels:
                 Database().add_label(label['color'], label['text'], board_id)
             return True
-        except Exception as e:
-            print(e)
+        except:
             return False
         finally:
             self.connection.close()
@@ -378,7 +387,7 @@ class Database:
     def _get_user_board_personal_from_unique_id(self, unique_id):
         try:
             with self.connection.cursor() as cursor:
-                sql = "SELECT starred, backgroud_pic, board_name FROM user_boards JOIN boards ON boards.id = user_boards.board_id WHERE unique_id=%s AND team=%s"
+                sql = "SELECT starred, backgroud_pic, board_name, url FROM user_boards JOIN boards ON boards.id = user_boards.board_id WHERE unique_id=%s AND team=%s"
                 cursor.execute(sql, (unique_id, False))
                 result = cursor.fetchone()
                 return result
@@ -395,7 +404,8 @@ class Database:
                     'members': elem['members'],
                     'starred': False if res['starred'] == b'\x00' else True,
                     'backgroud_pic': res['backgroud_pic'],
-                    'board_name': res['board_name']
+                    'board_name': res['board_name'],
+                    'url': res['url']
                 }
                 ret.append(tmp)
             return ret
@@ -405,7 +415,7 @@ class Database:
     def _get_user_board_team_from_unique_id(self, unique_id):
         try:
             with self.connection.cursor() as cursor:
-                sql = "SELECT starred, backgroud_pic, board_name FROM user_boards JOIN boards ON boards.id = user_boards.board_id WHERE unique_id=%s AND team=%s"
+                sql = "SELECT starred, backgroud_pic, board_name, url FROM user_boards JOIN boards ON boards.id = user_boards.board_id WHERE unique_id=%s AND team=%s"
                 cursor.execute(sql, (unique_id, True))
                 result = cursor.fetchall()
                 return result
@@ -420,10 +430,82 @@ class Database:
                 res = Database()._get_user_board_team_from_unique_id(elem['unique_id'])
                 tmp = {
                     'members': elem['members'],
-                    'boards': [{'starred': False if board['starred'] == b'\x00' else True, 'backgroud_pic': board['backgroud_pic'], 'board_name': board['board_name']} for board in res],
+                    'boards': [
+                        {
+                            'starred': False if board['starred'] == b'\x00' else True,
+                            'backgroud_pic': board['backgroud_pic'],
+                            'url': board['url'],
+                            'board_name': board['board_name']
+                        } for board in res],
                     'team_name': elem['team_name']
                 }
                 ret.append(tmp)
             return ret
         except:
             return []
+
+    def _get_board_id_from_url(self, url):
+        try:
+            with self.connection.cursor() as cursor:
+                sql = "SELECT id FROM boards WHERE url=%s"
+                cursor.execute(sql, (url,))
+                result = cursor.fetchone()
+                return result['id']
+        finally:
+            self.connection.close()
+
+    def _board_data_set_up(self, board_id):
+        try:
+            with self.connection.cursor() as cursor:
+                sql = "SELECT id FROM board_data WHERE board_id=%s"
+                cursor.execute(sql, (board_id,))
+                result = cursor.fetchone()
+                return 'id' in result
+        except:
+            return False
+        finally:
+            self.connection.close()
+
+    def change_board_data(self, url, _json):
+        try:
+            _json = json.dumps(_json)
+            board_id = Database()._get_board_id_from_url(url)
+            sql = "INSERT INTO board_data (json, board_id) VALUES (%s, %s)" if not Database()._board_data_set_up(board_id) else "UPDATE board_data SET json=%s WHERE board_id=%s;"
+            with self.connection.cursor() as cursor:
+                cursor.execute(sql, (_json, board_id))
+            self.connection.commit()
+            return True
+        except:
+            return False
+        finally:
+            self.connection.close()
+
+    def get_board_data(self, url):
+        try:
+            board_id = Database()._get_board_id_from_url(url)
+            with self.connection.cursor() as cursor:
+                sql = "SELECT json FROM board_data WHERE board_id=%s"
+                cursor.execute(sql, (board_id,))
+                result = cursor.fetchone()
+                return json.loads(result['json'])
+        except:
+            return []
+        finally:
+            self.connection.close()
+
+"""    def add_list(self, url, index, text):
+        try:
+            board_id = Database()._get_board_id_from_url(url)
+            with self.connection.cursor() as cursor:
+                sql = "INSERT INTO lists (board_id, index, text) VALUES (%s, %s, %s)"
+                cursor.execute(sql, (board_id, index, text))
+            self.connection.commit()
+            return True
+        except:
+            return False
+        finally:
+            self.connection.close()
+
+    def move_list(self, url, index):
+        pass
+"""
