@@ -27,16 +27,48 @@ class Database:
                                           cursorclass=pymysql.cursors.DictCursor
         )
 
-    def add_user(self, username, email, password):
+    def _login_exists(self, unique_login):
         try:
             with self.connection.cursor() as cursor:
+                sql = "SELECT id FROM users WHERE unique_login=%s"
+                cursor.execute(sql, (unique_login,))
+                result = cursor.fetchone()
+                return 'id' in result
+        except:
+            return False
+        finally:
+            self.connection.close()
+
+    def _generate_unique_login(self):
+        unique_login = ''.join(random.SystemRandom().choice(string.ascii_uppercase + string.digits) for _ in range(25))
+        while Database()._login_exists(unique_login):
+            unique_login = ''.join(random.SystemRandom().choice(string.ascii_uppercase + string.digits) for _ in range(25))
+        return unique_login
+
+    def get_username_from_unique_login(self, unique_login):
+        try:
+            with self.connection.cursor() as cursor:
+                sql = "SELECT username FROM users WHERE unique_login=%s"
+                cursor.execute(sql, (unique_login,))
+                result = cursor.fetchone()
+                return result['username']
+        except:
+            return None
+        finally:
+            self.connection.close()
+
+    def add_user(self, username, email, password):
+        try:
+            unique_login = self._generate_unique_login()
+            with self.connection.cursor() as cursor:
                 hashed = hashlib.sha256((password + config.SALT).encode('utf-8'))
-                sql = "INSERT INTO users (username, email, password) VALUES (%s, %s, %s)"
-                cursor.execute(sql, (username, email, hashed.hexdigest()))
+                sql = "INSERT INTO users (username, email, password, unique_login) VALUES (%s, %s, %s, %s)"
+                cursor.execute(sql, (username, email, hashed.hexdigest(), unique_login))
 
             self.connection.commit()
             return True
-        except:
+        except Exception as e:
+            print(e)
             return False
         finally:
             self.connection.close()
@@ -94,15 +126,15 @@ class Database:
             self.connection.close()
         return False
 
-    def get_username_from_email(self, email):
+    def get_username_unique_login_from_email(self, email):
         try:
             with self.connection.cursor() as cursor:
-                sql = "SELECT username FROM users WHERE email=%s"
+                sql = "SELECT username, unique_login FROM users WHERE email=%s"
                 cursor.execute(sql, (email,))
                 result = cursor.fetchone()
-                return result['username']
+                return result['username'], result['unique_login']
         except:
-            return None
+            return None, None
         finally:
             self.connection.close()
 
@@ -237,7 +269,6 @@ class Database:
             return False
         finally:
             self.connection.close()
-        return False
 
     def generate_url(self):
         url = ''.join(random.SystemRandom().choice(string.ascii_uppercase + string.digits) for _ in range(20))
