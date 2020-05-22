@@ -162,7 +162,10 @@ def add_board():
         return jsonify({'success': False, 'message': 'Please provide all informations'})
     if (request.json['team_name'] != '') and (not db.Database().team_name_exists(request.json['team_name'])):
         return jsonify({'success': False, 'message': "The team name doesn't exists"})
-    db.Database().create_board(request.json['team_name'], request.json['board_name'], request.json['backgroud_pic'], session['username'])
+    if db.Database().board_exists(request.json['team_name'], request.json['board_name'], session['username']):
+        return jsonify({'success': False, 'message': "There is already a board with the same name"})
+    if not db.Database().create_board(request.json['team_name'], request.json['board_name'], request.json['backgroud_pic'], session['username']):
+        return jsonify({'success': False, 'message': "Could not create new board"})
     return jsonify({'success': True, 'message': 'Successfully added new board'})
 
 @app.route('/get_personal_boards', methods=['GET'])

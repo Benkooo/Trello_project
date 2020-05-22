@@ -38,7 +38,7 @@ CREATE TABLE IF NOT EXISTS boards (
 
 CREATE TABLE IF NOT EXISTS labels (
     id int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    color varchar(255) UNIQUE COLLATE utf8_bin NOT NULL,
-    text varchar(255) UNIQUE COLLATE utf8_bin NOT NULL,
+    color varchar(255) COLLATE utf8_bin NOT NULL,
+    text varchar(255) COLLATE utf8_bin NOT NULL,
     board_id int(11) NOT NULL
 );

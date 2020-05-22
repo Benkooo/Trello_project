@@ -271,6 +271,18 @@ class Database:
         finally:
             self.connection.close()
 
+    def board_exists(team_name, board_name, username):################################################################################################"
+        try:
+            with self.connection.cursor() as cursor:
+                sql = "SELECT id FROM boards WHERE team_name=%s AND board_name=%s"#######################
+                cursor.execute(sql, (team_name, board_name))
+                result = cursor.fetchone()
+                return 'id' in result
+        except:
+            return False
+        finally:
+            self.connection.close()
+
     def _new_userboard(self, board_id, unique_id, team, starred):
         try:
             with self.connection.cursor() as cursor:
@@ -281,6 +293,16 @@ class Database:
             return True
         except:
             return False
+        finally:
+            self.connection.close()
+
+    def add_label(self, color, text, board_id):
+        try:
+            with self.connection.cursor() as cursor:
+                sql = "INSERT INTO labels (color, text, board_id) VALUES (%s, %s, %s)"
+                cursor.execute(sql, (color, text, board_id))
+
+            self.connection.commit()
         finally:
             self.connection.close()
 
@@ -298,7 +320,24 @@ class Database:
                 unique_id = Database()._get_teams_unique_id(team_name, user_id)###essayer!!!
                 if not Database()._new_userboard(board_id, unique_id, True, False):
                     raise Exception("cannot create new board")
-        except:
+            labels = (
+                {'color': 'green', 'text': ''},
+                {'color': 'yellow', 'text': ''},
+                {'color': 'orange', 'text': ''},
+                {'color': 'red', 'text': ''},
+                {'color': 'purple', 'text': ''},
+                {'color': 'blue', 'text': ''},
+                {'color': 'sky', 'text': ''},
+                {'color': 'lime', 'text': ''},
+                {'color': 'pink', 'text': ''},
+                {'color': 'black', 'text': ''},
+                {'color': '', 'text': ''}##no color
+            )
+            for label in labels:
+                Database().add_label(label['color'], label['text'], board_id)
+            return True
+        except Exception as e:
+            print(e)
             return False
         finally:
             self.connection.close()
