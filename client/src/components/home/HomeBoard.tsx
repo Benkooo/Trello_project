@@ -1,17 +1,33 @@
-import React, { useState, MouseEvent } from 'react'
+import React, { useState, MouseEvent, useEffect } from 'react'
 import { Typography, Grid, CardActionArea, Card } from '@material-ui/core'
 import StarBorderIcon from '@material-ui/icons/StarBorder';
 import PersonOutlineIcon from '@material-ui/icons/PersonOutline';
 import HomeCard from './HomeCard';
 import CreateBoard from '../utils/CreateBoard';
+import axios from 'axios'
 
 interface Props {
+}
+
+const getBoards = () => {
+    axios.get('http://localhost:5000/get_personal_boards')
+    .then(res => {
+        console.log(res)
+    })
+    .catch(err => {
+        console.error(err)
+    })
 }
 
 const HomeBoard: React.FC<Props> = () => {
     
     const [ favoriteItems, setFavoriteItems ] = useState(Array<string>())
     const [ open, setOpen ] = useState(false)
+
+    useEffect(() => {
+        console.log("JE RENTRE DANS LE USEEFFECT des boards")
+        getBoards()
+    });
 
     const handleClickOpen = () => {
         setOpen(true)

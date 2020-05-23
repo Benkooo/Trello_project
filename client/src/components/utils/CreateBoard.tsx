@@ -12,6 +12,8 @@ const CreateBoard: React.FC<Props> = ({
 }) => {
 
     const [color, setColor] = useState("#fff")
+    const [title, setTitle] = useState('')
+    //const [teamName, setTeamName ] = useState('')
 
     const handleChange = (newColor: any) => {
         setColor(newColor.hex)
@@ -30,6 +32,8 @@ const CreateBoard: React.FC<Props> = ({
                         margin="dense"
                         id="name"
                         label="Board title"
+                        value={title}
+                        onChange={(e: any) => setTitle(e.target.value)}
                         type="email"
                         fullWidth
                     />

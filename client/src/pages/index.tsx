@@ -25,7 +25,6 @@ const IndexPage = () => {
     return (
         <div>
             <div>
-                <Topbar />
                 <LoginController/>
             </div>
         </div>

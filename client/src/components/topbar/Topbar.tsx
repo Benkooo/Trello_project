@@ -77,7 +77,6 @@ const Topbar: React.FC<Props> = () => {
                         <InputBase
                             style={{color: 'white', marginLeft: '40px' }}
                             placeholder="Search…"
-                            inputProps={{ 'aria-label': 'search' }}
                         />
                     </Card>
                     
