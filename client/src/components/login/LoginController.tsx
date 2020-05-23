@@ -23,7 +23,7 @@ const LoginController = () => {
             </div>
             <div style={{display: 'flex', justifyContent: 'center', alignItems: 'center', marginTop: '160px'}}>
                 <img style={{marginRight: 'auto'}} src="leftImage.png" />
-                <img style={{marginRight: '20px'}} src="rightImage.png"/>
+                <img style={{marginRight: '20px', marginTop: '-30px'}} src="rightImage.png"/>
             </div>
         </div>
     );
