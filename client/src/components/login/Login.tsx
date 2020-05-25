@@ -29,7 +29,7 @@ function Alert(props: AlertProps) {
     return <MuiAlert elevation={6} variant="filled" {...props} />;
 }
 
-export const requestLogin = async (email: string, password: string) : Promise<[boolean, string]> => {
+export const requestLogin = async (email: string, password: string) : Promise<[boolean, string, string]> => {
     const headers = new Headers();
     headers.append("Content-Type", "application/json");
 
@@ -49,13 +49,13 @@ export const requestLogin = async (email: string, password: string) : Promise<[b
         if (response.success) {
             console.log("LA REPONSE: ", response)
             storeString("userEmail", email);
-            return [response.success, response.message];
+            return [response.success, response.message, response.unique_login];
         } else {
-            return [response.success, response.message];
+            return [response.success, response.message, ""];
         }
     } catch (error) {
         // ERROR
-        return [false, "Connection error"]
+        return [false, "Connection error", ""]
     }
 };
 
@@ -130,7 +130,10 @@ const Login = (props: Props) => {
                             requestLogin(username, sha256(password)).then(function(value) {
                                 if (value[0]) {
                                     setSuccess(true)
-                                    Router.push("/home")
+                                    Router.push({
+                                        pathname: '/home',
+                                        query: { id: value[2]}
+                                    })
                                 }
                                 else
                                     setError(true)

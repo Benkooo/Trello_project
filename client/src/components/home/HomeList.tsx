@@ -12,27 +12,38 @@ import CreateTeamDialog from './CreateTeamDialog';
 import TeamItem from './TeamItem';
 
 interface Props {
+    id: string
 }
 
-const getTeams = () => {
-    axios.get('http://localhost:5000/get_teams')
-    .then(res => {
-        console.log(res)
-    })
-    .catch(err => {
-        console.error(err)
-    })
-}
 
-const HomeList: React.FC<Props> = () => {
+const HomeList: React.FC<Props> = ({id}) => {
     const [open, setOpen] = useState(true)
     const [openTeam, setOpenTeam] = useState(false)
+    const [teamList, setTeamList] = useState([])
+    
+    const getTeams = (id: string) => {
+        axios.get('http://localhost:5000/get_teams', {
+            headers: {
+                unique_login: id
+            }
+        })
+        .then(res => {
+            const names = res.data.data.map(function(i: any) {
+                return i.team_name
+            })
+            console.log(names)
+            //setTeamList(names)
+        })
+        .catch(err => {
+            console.error(err)
+        })
+    }
 
     useEffect(() => {
-
         console.log("JE RENTRE DANS LE USEEFFECT")
-        getTeams()
-    });
+        if (id)
+            getTeams(id)
+    }, [teamList]);
 
     const handleClick = () => {
         setOpen(!open)
@@ -41,8 +52,6 @@ const HomeList: React.FC<Props> = () => {
     const handleOpenTeam = () => {
         setOpenTeam(!openTeam)
     }
-
-    const teams = ["Team 1", "Team 2", "Team 3", "Team 4"]
 
     return (
         <div style={{
@@ -74,13 +83,13 @@ const HomeList: React.FC<Props> = () => {
                 </IconButton>
                 <Collapse in={open} timeout="auto" unmountOnExit>
                     <List component="div" disablePadding style={{marginLeft: '20px'}}>
-                        {teams.map((title, index) => (
+                        {teamList.map((title, index) => (
                             <TeamItem key={index} title={title} index={index}/>
                         ))}
                     </List>
                 </Collapse>
             </List>
-            <CreateTeamDialog open={openTeam} handleClose={handleOpenTeam}/>
+            <CreateTeamDialog open={openTeam} handleClose={handleOpenTeam} id={id}/>
         </div>
     )
 }

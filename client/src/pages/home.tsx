@@ -4,6 +4,7 @@ import {makeStyles} from "@material-ui/styles";
 import {createStyles} from "@material-ui/core";
 import HomeList from '../components/home/HomeList';
 import HomeBoard from '../components/home/HomeBoard';
+import {useRouter } from 'next/router'
 
 const useStyles = makeStyles(
     createStyles({
@@ -25,6 +26,10 @@ const useStyles = makeStyles(
 const HomePage: React.FC = () => {
 
     const classes = useStyles()
+    const router = useRouter()
+    const uniqueId = router.query.id as string
+
+    console.log("AYAYAYAYA", uniqueId)
 
     return (
         <div className={classes.root} >
@@ -32,10 +37,10 @@ const HomePage: React.FC = () => {
             <div style={{minHeight: '100vh'}}>
                 <div style={{display: 'flex', flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'center'}}>
                     <div style={{ position: 'sticky', top: '0px'}}>
-                        <HomeList />
+                        <HomeList id={uniqueId}/>
                     </div>
                     <div style={{ margin: '40px 16px 0', width: '100%', maxWidth: '825px', minWidth: '288px'}}>
-                        <HomeBoard />
+                        <HomeBoard id={uniqueId}/>
                     </div>
                 </div>
             </div>

@@ -21,7 +21,7 @@ const LoginController = () => {
                     )}
                 </Card>
             </div>
-            <div style={{display: 'flex', justifyContent: 'center', alignItems: 'center', marginTop: '160px'}}>
+            <div style={{display: 'flex', justifyContent: 'center', alignItems: 'center', marginTop: '120px'}}>
                 <img style={{marginRight: 'auto'}} src="leftImage.png" />
                 <img style={{marginRight: '20px', marginTop: '-30px'}} src="rightImage.png"/>
             </div>

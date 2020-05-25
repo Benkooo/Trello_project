@@ -7,10 +7,16 @@ import CreateBoard from '../utils/CreateBoard';
 import axios from 'axios'
 
 interface Props {
+    id: string
 }
 
-const getBoards = () => {
-    axios.get('http://localhost:5000/get_personal_boards')
+const getBoards = (id: string) => {
+
+    axios.get('http://localhost:5000/get_personal_boards', {
+        headers: {
+            unique_login: id
+        }
+    })
     .then(res => {
         console.log(res)
     })
@@ -19,14 +25,15 @@ const getBoards = () => {
     })
 }
 
-const HomeBoard: React.FC<Props> = () => {
+const HomeBoard: React.FC<Props> = ({id}) => {
     
     const [ favoriteItems, setFavoriteItems ] = useState(Array<string>())
     const [ open, setOpen ] = useState(false)
 
     useEffect(() => {
         console.log("JE RENTRE DANS LE USEEFFECT des boards")
-        getBoards()
+        if (id)
+            getBoards(id)
     });
 
     const handleClickOpen = () => {

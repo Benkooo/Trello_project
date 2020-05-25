@@ -10,14 +10,17 @@ import axios from 'axios'
 
 interface Props {
     open: boolean,
-    handleClose: any
+    handleClose: any,
+    id: string
 }
 
 
 const CreateTeamDialog: React.FC<Props> = ({
-    open, handleClose
+    open, handleClose, id
 }) => {
     
+    console.log("POPOPOPO", id)
+
     const [teamName, setTeamName] = useState('')
     const [teamDescription, setTeamDescription] = useState('')
     const isEmpty = !(teamName && teamDescription) as boolean
@@ -25,9 +28,13 @@ const CreateTeamDialog: React.FC<Props> = ({
     const postTeam = () => {
         console.log("TEAM ADDED")
         axios.post('http://localhost:5000/add_team', {
-            team_name: teamName,
-            team_members: "user1"
-        })
+                team_name: teamName,
+                team_members: []
+            }, {
+                headers: {
+                    unique_login: id
+                }
+            })
             .then(res => {
                 console.log(res)
             }).catch((err) => {
