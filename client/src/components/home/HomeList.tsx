@@ -20,7 +20,8 @@ const HomeList: React.FC<Props> = ({id}) => {
     const [open, setOpen] = useState(true)
     const [openTeam, setOpenTeam] = useState(false)
     const [teamList, setTeamList] = useState([])
-    
+    const [teamUpdate, setTeamUpdate] = useState(false)
+
     const getTeams = (id: string) => {
         axios.get('http://localhost:5000/get_teams', {
             headers: {
@@ -41,14 +42,19 @@ const HomeList: React.FC<Props> = ({id}) => {
     useEffect(() => {
         if (id)
             getTeams(id)
-    }, []);
-  
+        setTeamUpdate(false)
+    }, [teamUpdate]);
+
     const handleClick = () => {
         setOpen(!open)
     }
 
     const handleOpenTeam = () => {
         setOpenTeam(!openTeam)
+    }
+
+    const updatingTeam = () => {
+        setTeamUpdate(true);
     }
 
     return (
@@ -74,7 +80,7 @@ const HomeList: React.FC<Props> = ({id}) => {
                     <ListItemText primaryTypographyProps={{ style: {fontWeight: 'bold', color: '#7f8da1' , fontSize: '13px'} }} primary="TEAMS" />
                     { open ? <ExpandLess style={{color: '#7f8da1', height: '20px'}} /> : <ExpandMore style={{ color: '#7f8da1', height: '20px' }} />}
                 </ListItem>
-                <IconButton 
+                <IconButton
                 onClick={handleOpenTeam}
                 style={{position: 'absolute', marginBottom: '100px', marginTop: '-42px', marginLeft: '270px'}}>
                     <AddIcon style={{color: '#7f8da1', height: '20px'}}/>
@@ -87,7 +93,7 @@ const HomeList: React.FC<Props> = ({id}) => {
                     </List>
                 </Collapse>
             </List>
-            <CreateTeamDialog open={openTeam} handleClose={handleOpenTeam} id={id}/>
+            <CreateTeamDialog updatingTeam={updatingTeam} open={openTeam} handleClose={handleOpenTeam} id={id}/>
         </div>
     )
 }

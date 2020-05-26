@@ -1,11 +1,12 @@
 import React from "react";
 import {DragDropContext, Draggable, Droppable} from "react-beautiful-dnd";
-import {Button, Typography, withStyles} from "@material-ui/core";
+import {Button, IconButton, Typography, withStyles} from "@material-ui/core";
 import AddIcon from "@material-ui/icons/Add";
 import BoardColumn from "./BoardColumn";
 import {LoginResponse} from "../../interfaces/requests";
 import {storeString} from "../../helpers/SessionStorageHelper";
 import axios from "axios";
+import StarBorderIcon from "@material-ui/icons/StarBorder";
 
 const StyledButton = withStyles({
     root: {
@@ -230,7 +231,15 @@ export default class Board extends React.Component {
         console.log("1: ", this.state.items);
         return (
             <div>
-                <Typography style={{fontWeight: 'bold', fontSize: '20px', color:'white'}}>Board Name</Typography>
+                <div style={{display:'flex', flexDirection: 'row'}}>
+                    {
+                        this.state.boardParams.favorite ?
+                                <StarBorderIcon style={{marginRight: '10px', height: '25px', color: 'yellow'}} />
+                                :
+                                <StarBorderIcon style={{marginRight: '10px', height: '25px', color: 'white'}} />
+                    }
+                    <Typography style={{fontWeight: 'bold', fontSize: '20px', color:'white'}}>Board Name</Typography>
+                </div>
                 <div style={{marginTop: '20px', display: "flex"}}>
                     <DragDropContext onDragEnd={this.onDragEnd} onDragStart={this.onDragStart}>
                         <Droppable droppableId="droppable" direction="horizontal" isDropDisabled={this.state.isColDisabled}>

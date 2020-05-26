@@ -18,7 +18,7 @@ interface Props {
 
 
 const CreateTeamDialog: React.FC<Props> = ({
-    open, handleClose, id
+    open, handleClose, id, updatingTeam
 }) => {
 
     const [dispBar, setDispBar] = useState(false)
@@ -27,6 +27,7 @@ const CreateTeamDialog: React.FC<Props> = ({
     const isEmpty = !(teamName && teamDescription) as boolean
 
     const postTeam = () => {
+        updatingTeam();
         axios.post('http://localhost:5000/add_team', {
                 team_name: teamName,
                 team_members: []
@@ -73,7 +74,7 @@ const CreateTeamDialog: React.FC<Props> = ({
                         onChange={(e: any) => setTeamName(e.target.value)}
                         style={{marginBottom: '25px'}}
                     />
-                    <TextField 
+                    <TextField
                         id="outlined-multiline-static"
                         label="Description"
                         multiline
