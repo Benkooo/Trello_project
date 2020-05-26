@@ -22,6 +22,7 @@ const TopbarBoardList: React.FC<Props> = ({
     const [openPerso, setOpenPerso] = useState(true)
     const [ openCreateBoard, setOpenCreateBoard ] = useState(false)
     const [ boardList, setBoardList ] = useState([])
+    const [ boardUpdate, setBoardUpdate] = useState(false)
 
     const getBoards = (id: string) => {
 
@@ -42,7 +43,8 @@ const TopbarBoardList: React.FC<Props> = ({
     useEffect(() => {
         if (id)
             getBoards(id)
-    }, []);
+        setBoardUpdate(false);
+    }, [boardUpdate]);
 
     const handleClickOpenCreateBoard = () => {
         setOpenCreateBoard(true)
@@ -57,6 +59,10 @@ const TopbarBoardList: React.FC<Props> = ({
     }
     const handleClickPerso = () => {
         setOpenPerso(!openPerso)
+    }
+
+    const updatingBoard = () => {
+        setBoardUpdate(true);
     }
 
     return (
@@ -80,17 +86,6 @@ const TopbarBoardList: React.FC<Props> = ({
                     />
                     <div style={{width: '270px', marginTop: '10px', marginRight: 'auto', marginLeft: '10px', color: '#7f8da1', display: 'flex', flexDirection: 'row', justifyContent: 'center', alignItems: 'center'}}>
                         <List component="nav">
-                            <ListItem button onClick={handleClick} style={{height: '38px', borderRadius: '4px'}}>
-                                <StarBorderIcon style={{marginLeft: '-11px', height: '19px'}}/>
-                                <ListItemText primaryTypographyProps={{ style: {marginLeft: '7px', fontWeight: 'bold', color: '#7f8da1' , fontSize: '13px'} }} primary="STARRED BOARDS" />
-                                { open ? <ExpandLess style={{marginLeft: '70px', color: '#7f8da1', height: '20px'}} /> : <ExpandMore style={{ marginLeft: '70px', color: '#7f8da1', height: '20px' }} />}
-                            </ListItem>
-                            <Collapse in={open} timeout="auto" unmountOnExit>
-                                <List component="div" disablePadding>
-                                    <BoardListItem />
-                                    <BoardListItem />
-                                </List>
-                            </Collapse>
                             <ListItem button onClick={handleClickPerso} style={{height: '38px', borderRadius: '4px'}}>
                                 <PersonOutlineIcon style={{marginLeft: '-11px', height: '19px'}}/>
                                 <ListItemText primaryTypographyProps={{ style: {marginLeft: '7px', fontWeight: 'bold', color: '#7f8da1' , fontSize: '12px'} }} primary="PERSONAL BOARDS" />
@@ -98,8 +93,14 @@ const TopbarBoardList: React.FC<Props> = ({
                             </ListItem>
                             <Collapse in={openPerso} timeout="auto" unmountOnExit>
                                 <List component="div" disablePadding>
-                                    <BoardListItem />
-                                    <BoardListItem />
+                                {
+                                    boardList &&
+                                    <>
+                                        {boardList.map((i: any, index: number) => (
+                                            <BoardListItem key={index} id={id} color={i.bg_color} title={i.board_name} favorite={i.starred} url={i.url}/>
+                                        ))}
+                                    </>
+                                }
                                 </List>
                             </Collapse>
                             <ListItem button onClick={handleClickOpenCreateBoard} style={{marginTop: '5px', borderRadius: '4px'}}>
@@ -107,7 +108,7 @@ const TopbarBoardList: React.FC<Props> = ({
                                     Create new board...
                                 </Typography>
                             </ListItem>
-                            <CreateBoard open={openCreateBoard} handleClose={handleCloseCreateBoard} id={id}/>
+                            <CreateBoard updatingBoard={updatingBoard} open={openCreateBoard} handleClose={handleCloseCreateBoard} id={id}/>
                         </List>
                     </div>
                 </div>

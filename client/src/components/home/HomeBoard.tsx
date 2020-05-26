@@ -12,8 +12,7 @@ interface Props {
 
 
 const HomeBoard: React.FC<Props> = ({id}) => {
-
-    const [ favoriteItems, setFavoriteItems ] = useState(Array<string>())
+    
     const [ open, setOpen ] = useState(false)
     const [ boardList, setBoardList] = useState([])
     const [ favoriteList, setFavoriteList ] = useState([])
