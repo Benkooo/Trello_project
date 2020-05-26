@@ -7,7 +7,6 @@ const ProfilePage = () => {
         <div style={{ height: "100%", textAlign: "center"}}>
             <div>
                 <Topbar id="coco"/>
-                <ProfileController/>
             </div>
         </div>
     );

@@ -12,9 +12,9 @@ interface Props {
 
 
 const CreateBoard: React.FC<Props> = ({
-    handleClose, open, id
+    handleClose, open, id, updatingBoard
 }) => {
-    
+
     const [color, setColor] = useState("#fff")
     const [title, setTitle] = useState('')
     const [teamList, setTeamList] = useState([])
@@ -44,6 +44,7 @@ const CreateBoard: React.FC<Props> = ({
     }, [])
 
     const postBoard = () => {
+        updatingBoard();
         axios.post('http://localhost:5000/add_board', {
                 board_name: title,
                 team_name: selectedTeam,
@@ -104,7 +105,7 @@ const CreateBoard: React.FC<Props> = ({
                         <div style={{marginTop: '20px', marginRight: '160px', position: 'relative', display: "flex", justifyContent: 'center', alignItems: 'center', flexDirection: 'column'}}>
                             <Card style={{marginBottom: '16px', marginLeft: '-235px', height: '30px', width: '30px', backgroundColor: color}}>
                             </Card>
-                            <TwitterPicker 
+                            <TwitterPicker
                                 style={{marginLeft: '30px'}}
                                 color={color}
                                 onChangeComplete={handleChange}/>
