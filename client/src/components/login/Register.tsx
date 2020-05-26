@@ -1,10 +1,10 @@
 import {Button, CircularProgress, createStyles, Divider, Snackbar, TextField, Typography} from "@material-ui/core";
 import React, {useState} from "react";
-import {RegisterResponse} from "../../interfaces/requests";
 import {sha256} from "js-sha256";
 import {makeStyles} from "@material-ui/styles";
-import {requestLogin} from "./Login";
 import MuiAlert, {AlertProps} from "@material-ui/lab/Alert";
+import {BasicResponse} from "../../interfaces/requests";
+import Router from "next/router";
 
 // import Login from "./Login";
 
@@ -49,7 +49,7 @@ const requestRegister = async (email: string, username: string, password: string
                 body: raw,
                 headers
             })
-        ).json()) as RegisterResponse;
+        ).json()) as BasicResponse;
         return [response.success, response.message];
     } catch (error) {
         return [false, "Connection error"]
@@ -96,14 +96,14 @@ const Register = (props: Props) => {
                 }}
             >
                 <Typography variant="h6" gutterBottom style={{marginBottom: "20px", color: "grey", display: "flex", justifyContent: "center"}}>
-                    Inscivez-vous à un compte
+                    Sign up for your account
                 </Typography>
                 {loading && <CircularProgress size={48} className={classes.buttonProgress}/>}
                 <TextField
                     required
                     className={classes.textField}
                     id="emailRegister"
-                    label="Username"
+                    label="Enter email"
                     autoFocus
                     value={email}
                     onChange={(sender: any) => setEmail(sender.target.value)}
@@ -112,7 +112,7 @@ const Register = (props: Props) => {
                     required
                     className={classes.textField}
                     id="nameRegister"
-                    label="Full name"
+                    label="Enter full name"
                     value={username}
                     onChange={(sender: any) => setUsername(sender.target.value)}
                 />
@@ -121,7 +121,7 @@ const Register = (props: Props) => {
                     className={classes.textField}
                     id="standard-password-input"
                     type="password"
-                    label="Password"
+                    label="Create password"
                     value={password}
                     onChange={(sender: any) => setPassword(sender.target.value)}
                 />
@@ -144,7 +144,7 @@ const Register = (props: Props) => {
                             requestRegister(email, username, sha256(password), sha256(cPassword)).then(function(value) {
                                 if (value[0]) {
                                     setSuccess(true)
-                                    requestLogin(email, password)
+                                    Router.push("/")
                                 }
                                 else
                                     setError(true)
@@ -152,7 +152,7 @@ const Register = (props: Props) => {
                             })
                         }}
                     >
-                        Register
+                        Sign Up
                     </Button>
                 </div>
                 <Divider variant={"middle"}/>
@@ -162,7 +162,7 @@ const Register = (props: Props) => {
                         style={{ marginTop: "20px", fontSize: "12px"}}
                         onClick={() => props.setDisplayRegister(false)}
                     >
-                        Already registered ? Log in
+                        Already have an account? Log In
                     </Button>
                 </div>
                 <Snackbar style={{marginBottom: '900px'}} open={success} autoHideDuration={6000} onClose={handleClose}>

@@ -1,5 +1,7 @@
 import React, { useRef } from 'react'
+// @ts-ignore
 import { useDrag, useDrop, DropTargetMonitor } from 'react-dnd'
+// @ts-ignore
 import { XYCoord } from 'dnd-core'
 
 const style = {

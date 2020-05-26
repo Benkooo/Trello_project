@@ -1,18 +1,18 @@
 
 
-interface BasicResponse {
+export interface BasicResponse {
     success: boolean;
     message: string;
 }
 
-export interface LoginRequest {
+export interface LoginResponse extends BasicResponse{
     username: string;
-    password: string;
+    unique_login: string;
 }
 
-export type RegisterRequest = LoginRequest;
-export type RegisterResponse = BasicResponse;
+// export type RegisterRequest = LoginRequest;
+// export type RegisterResponse = BasicResponse;
 
-export interface LoginResponse extends BasicResponse {
-    token: string;
-}
+// export interface LoginResponse extends BasicResponse {
+//     token: string;
+// }
