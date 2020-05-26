@@ -9,11 +9,12 @@ import CreateBoard from '../utils/CreateBoard';
 
 interface Props {
     anchorEl: any,
-    handleClose: any
+    handleClose: any,
+    id: string
 }
 
 const TopbarBoardList: React.FC<Props> = ({
-    anchorEl, handleClose
+    anchorEl, handleClose, id
 }) => {
 
     const [open, setOpen ] = useState(true)
@@ -83,7 +84,7 @@ const TopbarBoardList: React.FC<Props> = ({
                                     Create new board...
                                 </Typography>
                             </ListItem>
-                            <CreateBoard open={openCreateBoard} handleClose={handleCloseCreateBoard}/>
+                            <CreateBoard open={openCreateBoard} handleClose={handleCloseCreateBoard} id={id}/>
                         </List>
                     </div>
                 </div>

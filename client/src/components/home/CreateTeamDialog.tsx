@@ -4,9 +4,11 @@ import TextField from '@material-ui/core/TextField';
 import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
+import { Snackbar} from '@material-ui/core'
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import axios from 'axios'
+import Alert from '@material-ui/lab/Alert';
 
 interface Props {
     open: boolean,
@@ -18,15 +20,13 @@ interface Props {
 const CreateTeamDialog: React.FC<Props> = ({
     open, handleClose, id
 }) => {
-    
-    console.log("POPOPOPO", id)
 
+    const [dispBar, setDispBar] = useState(false)
     const [teamName, setTeamName] = useState('')
     const [teamDescription, setTeamDescription] = useState('')
     const isEmpty = !(teamName && teamDescription) as boolean
 
     const postTeam = () => {
-        console.log("TEAM ADDED")
         axios.post('http://localhost:5000/add_team', {
                 team_name: teamName,
                 team_members: []
@@ -37,9 +37,18 @@ const CreateTeamDialog: React.FC<Props> = ({
             })
             .then(res => {
                 console.log(res)
+                handleClose()
+                setTeamDescription('')
+                setTeamName('')
+                if (res.data.success)
+                    setDispBar(true)
             }).catch((err) => {
                 console.error(err)
             })
+    }
+
+    const handleCloseBar = () => {
+        setDispBar(false)
     }
 
     return (
@@ -88,6 +97,11 @@ const CreateTeamDialog: React.FC<Props> = ({
                     </Button>
                 </DialogActions>
             </Dialog>
+            <Snackbar style={{marginBottom: '850px'}} open={dispBar} autoHideDuration={6000} onClose={handleCloseBar}>
+                    <Alert onClose={handleCloseBar} severity="success">
+                        Successfully created team
+                    </Alert>
+            </Snackbar>
         </div>
     );
 }

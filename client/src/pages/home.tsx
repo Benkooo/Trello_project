@@ -33,7 +33,7 @@ const HomePage: React.FC = () => {
 
     return (
         <div className={classes.root} >
-            <Topbar />
+            <Topbar id={uniqueId}/>
             <div style={{minHeight: '100vh'}}>
                 <div style={{display: 'flex', flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'center'}}>
                     <div style={{ position: 'sticky', top: '0px'}}>

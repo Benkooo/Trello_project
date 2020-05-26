@@ -20,6 +20,7 @@ const HomeList: React.FC<Props> = ({id}) => {
     const [open, setOpen] = useState(true)
     const [openTeam, setOpenTeam] = useState(false)
     const [teamList, setTeamList] = useState([])
+    const [tmp, setTmp ] = useState([])
     
     const getTeams = (id: string) => {
         axios.get('http://localhost:5000/get_teams', {
@@ -31,8 +32,7 @@ const HomeList: React.FC<Props> = ({id}) => {
             const names = res.data.data.map(function(i: any) {
                 return i.team_name
             })
-            console.log(names)
-            //setTeamList(names)
+            setTeamList(names)
         })
         .catch(err => {
             console.error(err)
@@ -40,11 +40,10 @@ const HomeList: React.FC<Props> = ({id}) => {
     }
 
     useEffect(() => {
-        console.log("JE RENTRE DANS LE USEEFFECT")
         if (id)
             getTeams(id)
-    }, [teamList]);
-
+    }, []);
+  
     const handleClick = () => {
         setOpen(!open)
     }

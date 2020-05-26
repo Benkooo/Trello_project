@@ -1,19 +1,73 @@
-import React, {useState } from 'react'
-import {Button, Dialog, TextField, Select, Card,MenuItem, DialogActions, DialogContent, DialogTitle, DialogContentText} from '@material-ui/core'
+import React, {useState, useEffect } from 'react'
+import {Button, Dialog, Snackbar, TextField, Select, Card,MenuItem, DialogActions, DialogContent, DialogTitle, DialogContentText} from '@material-ui/core'
 import { TwitterPicker} from 'react-color'
+import Alert from '@material-ui/lab/Alert';
+import axios from 'axios'
 
 interface Props {
     handleClose: any,
-    open: boolean
+    open: boolean,
+    id: string
 }
 
-const CreateBoard: React.FC<Props> = ({
-    handleClose, open
-}) => {
 
+const CreateBoard: React.FC<Props> = ({
+    handleClose, open, id
+}) => {
+    
     const [color, setColor] = useState("#fff")
     const [title, setTitle] = useState('')
-    //const [teamName, setTeamName ] = useState('')
+    const [teamList, setTeamList] = useState([])
+    const [dispBar, setDispBar] = useState(false)
+    const [selectedTeam, setSelectedTeam ] = useState('')
+
+    const handleChangeTeam = (e: any) => {
+        setSelectedTeam(e.target.value)
+    }
+
+    useEffect(() => {
+        axios.get('http://localhost:5000/get_teams', {
+            headers: {
+                unique_login: id
+            }
+        })
+        .then(res => {
+            const names = res.data.data.map(function(i: any) {
+                return i.team_name
+            })
+            console.log("Team List in board creation : ", names)
+            setTeamList(names)
+        })
+        .catch(err => {
+            console.error(err)
+        })
+    }, [])
+
+    const postBoard = () => {
+        axios.post('http://localhost:5000/add_board', {
+                board_name: title,
+                team_name: selectedTeam,
+                bg_color: color
+            }, {
+                headers: {
+                    unique_login: id
+                }
+            })
+            .then(res => {
+                console.log(res)
+                handleClose()
+                setColor('')
+                setTitle('')
+                if (res.data.success)
+                    setDispBar(true)
+            }).catch((err) => {
+                console.error(err)
+            })
+    }
+
+    const handleCloseBar = () => {
+        setDispBar(false)
+    }
 
     const handleChange = (newColor: any) => {
         setColor(newColor.hex)
@@ -40,10 +94,12 @@ const CreateBoard: React.FC<Props> = ({
                     <div style={{marginTop: '20px', marginBottom: '25px', display: "flex", justifyContent: 'center', alignItems: 'center', flexDirection: 'row'}}>
                         <Select
                             style={{marginRight: '40px', marginBottom: '92px'}}
-                            labelId="select">
-                            <MenuItem value="No team">No team</MenuItem>
-                            <MenuItem value="team 1">Team 1</MenuItem>
-                            <MenuItem value="Team 2">Team 2</MenuItem>
+                            labelId="select"
+                            value={selectedTeam}
+                            onChange={handleChangeTeam}>
+                            {teamList.map((title, index) => (
+                                <MenuItem key={index} value={title}>{title}</MenuItem>
+                            ))}
                         </Select>
                         <div style={{marginTop: '20px', marginRight: '160px', position: 'relative', display: "flex", justifyContent: 'center', alignItems: 'center', flexDirection: 'column'}}>
                             <Card style={{marginBottom: '16px', marginLeft: '-235px', height: '30px', width: '30px', backgroundColor: color}}>
@@ -59,11 +115,16 @@ const CreateBoard: React.FC<Props> = ({
                     <Button style={{textTransform: 'none'}} onClick={handleClose} variant="contained">
                         Cancel
                     </Button>
-                    <Button style={{textTransform: 'none', color: 'primary', marginRight: '18px'}} variant="contained" color="primary">
+                    <Button onClick={postBoard} style={{textTransform: 'none', color: 'primary', marginRight: '18px'}} variant="contained" color="primary">
                         Create Board
                     </Button>
                 </DialogActions>
             </Dialog>
+            <Snackbar style={{marginBottom: '850px'}} open={dispBar} autoHideDuration={6000} onClose={handleCloseBar}>
+                    <Alert onClose={handleCloseBar} severity="success">
+                        Successfully created board
+                    </Alert>
+            </Snackbar>
         </div>
     )
 }

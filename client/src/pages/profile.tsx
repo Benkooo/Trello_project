@@ -42,7 +42,7 @@ const ProfilePage = () => {
         // <div className={classes.root}  style={{ height: "100%", textAlign: "center"}}>
         <div style={{ height: "100%", textAlign: "center"}}>
             <div>
-                <Topbar />
+                <Topbar id="coco"/>
                 Profile
                 <Paper>
                     <Tabs

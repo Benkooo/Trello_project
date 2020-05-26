@@ -21,9 +21,10 @@ import TopbarBoardList from './TopbarBoardList'
 import TopbarProfile from './TopbarProfile'
 
 interface Props {
+    id: string
 }
 
-const Topbar: React.FC<Props> = () => {
+const Topbar: React.FC<Props> = ({id}) => {
     const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
     const [ anchorElBoard, setAnchorElBoard] = React.useState<null | HTMLElement>(null);
     const userEmail = getString("userEmail")
@@ -68,7 +69,7 @@ const Topbar: React.FC<Props> = () => {
                             </div>
                         </CardActionArea>
                     </Card>
-                    <TopbarBoardList anchorEl={anchorElBoard} handleClose={handleClose}/>
+                    <TopbarBoardList id={id} anchorEl={anchorElBoard} handleClose={handleClose}/>
 
                     <Card style={{ width: '180px', minWidth: '120px', marginLeft: '5px',backgroundColor: '#67A6CA', marginBottom: '21px', position: 'relative'}}>
                         <div style={{color: 'white', marginLeft: '10px', marginBottom: '21px', height: '100%', position: 'absolute', pointerEvents: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>

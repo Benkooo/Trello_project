@@ -10,31 +10,33 @@ interface Props {
     id: string
 }
 
-const getBoards = (id: string) => {
-
-    axios.get('http://localhost:5000/get_personal_boards', {
-        headers: {
-            unique_login: id
-        }
-    })
-    .then(res => {
-        console.log(res)
-    })
-    .catch(err => {
-        console.error(err)
-    })
-}
 
 const HomeBoard: React.FC<Props> = ({id}) => {
     
     const [ favoriteItems, setFavoriteItems ] = useState(Array<string>())
     const [ open, setOpen ] = useState(false)
+    const [ boardList, setBoardList] = useState([])
+    
+    const getBoards = (id: string) => {
+    
+        axios.get('http://localhost:5000/get_personal_boards', {
+            headers: {
+                unique_login: id
+            }
+        })
+        .then(res => {
+            console.log(res.data.data)
+            setBoardList(res.data.data)
+        })
+        .catch(err => {
+            console.error(err)
+        })
+    }
 
     useEffect(() => {
-        console.log("JE RENTRE DANS LE USEEFFECT des boards")
         if (id)
             getBoards(id)
-    });
+    }, []);
 
     const handleClickOpen = () => {
         setOpen(true)
@@ -61,6 +63,8 @@ const HomeBoard: React.FC<Props> = ({id}) => {
             favoriteItems.filter(item => item !== toString)
         )
     }
+
+    console.log("BOARD LIST : ", boardList)
 
     return (
         <div style={{
@@ -94,18 +98,16 @@ const HomeBoard: React.FC<Props> = ({id}) => {
 
             <div style={{textAlign: 'center' }}>
                 <Grid container spacing={3}>
-                    <Grid item xs={4}>
-                        <HomeCard addItems={addItems} title="Bistro" favorite={false}/>
-                    </Grid>
-                    <Grid item xs={4}>
-                        <HomeCard addItems={addItems} title="Corewar" favorite={false}/>
-                    </Grid>
-                    <Grid item xs={4}>
-                        <HomeCard addItems={addItems} title="Minishell" favorite={false}/>
-                    </Grid>
-                    <Grid item xs={4}>
-                        <HomeCard addItems={addItems} title="Printf" favorite={false}/>
-                    </Grid>
+                    {
+                        boardList &&
+                        <> 
+                            {boardList.map((i: any, index: number) => (
+                                <Grid key={index} item xs={4}>
+                                    <HomeCard key={index} addItems={addItems} color={i.bg_color} title={i.board_name} favorite={i.starred} url={i.url}/>
+                                </Grid>
+                            ))}
+                        </>
+                    }
                     <Grid item xs={4}>
                         <CardActionArea style={{marginTop: '10px'}} onClick={handleClickOpen}>
                             <Card style={{display: 'flex', justifyContent: 'center', alignItems: 'center',height: '90px' }}>
@@ -113,7 +115,7 @@ const HomeBoard: React.FC<Props> = ({id}) => {
                             </Card>
                         </CardActionArea>
                     </Grid>
-                    <CreateBoard open={open} handleClose={handleClose}/>
+                    <CreateBoard open={open} handleClose={handleClose} id={id}/>
                 </Grid>
             </div>
         </div>
