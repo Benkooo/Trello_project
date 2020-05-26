@@ -31,13 +31,14 @@ const BoardPage = (props: any) => {
 
     console.log("BOARDS PARAMETERS : ", router.query)
     props = router.query;
+    const uniqueId = router.query.id as string
     console.log("BOARDS PARAMETERS : ", props)
 
     const classes = useStyles(props);
     return (
         <div className={classes.root}>
             <div>
-                <Topbar id="odod" color={router.query.color} board={true}/>
+                <Topbar id={uniqueId} color={router.query.color} board={true}/>
                 <div style={{display: "flex", marginRight: "auto", marginLeft: "10px", marginTop: "10px"}}>
                     <Typography style={{color: "white", fontSize: "25px"}}> Project: Trello</Typography>
                 </div>
