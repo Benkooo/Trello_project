@@ -86,6 +86,8 @@ export default class Board extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
+            id: "",
+            url: "",
             items: [],
             boardParams: this.props.boardParams,
             focused: false,
@@ -98,6 +100,7 @@ export default class Board extends React.Component {
     }
 
     updateData() {
+        console.log("ID ID ID", this.state.boardParams.id, this.state.boardParams.url);
         axios.post('http://localhost:5000/' + this.state.boardParams.url + '/change_board_data', {
                 json: this.state.items
             },{
@@ -114,20 +117,24 @@ export default class Board extends React.Component {
     }
 
     componentDidMount() {
-        console.log("ID", localStorage.getItem("id"));
-        axios.post('http://localhost:5000/' + this.state.boardParams.url + '/get_board_data', {
+        const id = localStorage.getItem("id");
+        const url = localStorage.getItem("url");
+        console.log("ID", id);
+        console.log("ID", url);
+        axios.post('http://localhost:5000/' + url + '/get_board_data', {
             }, {
             headers: {
-                unique_login: this.state.boardParams.id
+                unique_login: id
             }
         })
             .then(res => {
-                console.log("RESPONSE", res.data)
+                console.log("RESPONSE GET BOARD", res.data)
                 this.setState({items: res.data.data})
             })
             .catch(err => {
                 console.error(err)
             })
+        this.setState({id: id, url: url});
     }
 
     editTitle = (text, index) => {

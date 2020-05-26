@@ -1,5 +1,4 @@
 import Topbar from "../components/topbar/Topbar";
-import ProfileController from "../components/profile/ProfileController";
 import React from "react";
 
 

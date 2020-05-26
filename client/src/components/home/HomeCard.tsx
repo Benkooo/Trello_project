@@ -15,9 +15,10 @@ interface Props {
 const HomeCard: React.FC<Props> = ({title, addItems, favorite, color, url, id}) => {
 
     const doRedirect = () => {
+        console.log("HFUOHFOUHAOE");
         Router.push({
             pathname: '/board',
-            query: { 
+            query: {
                 title: title,
                 favorite: favorite,
                 color: color,

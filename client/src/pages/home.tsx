@@ -24,16 +24,10 @@ const useStyles = makeStyles(
 );
 
 const HomePage: React.FC = () => {
-
     const classes = useStyles()
     const router = useRouter()
-    //const uniqueId = router.query.id as string
-    const [uniqueId, setUniqueId] = useState('')
-    
-    useEffect(() => {
-        setUniqueId(localStorage.getItem("id") as string);
-    }, []);
-    
+    const uniqueId = router.query.id as string
+
     console.log("AYAYAYAYA", uniqueId)
 
     return (

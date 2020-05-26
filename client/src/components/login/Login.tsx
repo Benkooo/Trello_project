@@ -129,6 +129,7 @@ const Login = (props: Props) => {
                             requestLogin(username, sha256(password)).then(function(value) {
                                 if (value[0]) {
                                     setSuccess(true)
+                                    localStorage.setItem("id", value[2]);
                                     Router.push({
                                         pathname: '/home',
                                         query: { id: value[2]}
