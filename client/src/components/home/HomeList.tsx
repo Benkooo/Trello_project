@@ -41,7 +41,7 @@ const HomeList: React.FC<Props> = ({id}) => {
     useEffect(() => {
         if (id)
             getTeams(id)
-    }, [teamList]);
+    }, []);
   
     const handleClick = () => {
         setOpen(!open)
