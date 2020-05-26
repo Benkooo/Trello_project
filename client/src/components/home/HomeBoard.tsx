@@ -16,6 +16,7 @@ const HomeBoard: React.FC<Props> = ({id}) => {
     const [ favoriteItems, setFavoriteItems ] = useState(Array<string>())
     const [ open, setOpen ] = useState(false)
     const [ boardList, setBoardList] = useState([])
+    const [ favoriteList, setFavoriteList ] = useState([])
 
     const getBoards = (id: string) => {
 
@@ -49,22 +50,35 @@ const HomeBoard: React.FC<Props> = ({id}) => {
     const addItems = (e: MouseEvent) => {
         e.preventDefault()
         const id = e.currentTarget.getAttribute("itemid")
-        const toString = id as string
-        setFavoriteItems([
-            ...favoriteItems, toString
-        ])
+        for (var j = 0; j < boardList.length; j++) {
+            if (id === boardList[j].board_name) {
+                const names = favoriteList.map(function(value) {
+                    return value.board_name
+                })
+                if (!names.includes(boardList[j].board_name)) {
+                    setFavoriteList([
+                        ...favoriteList, boardList[j]
+                    ])
+                }
+            }
+        }
     }
 
     const removeItems = (e: MouseEvent) => {
         e.preventDefault()
         const id = e.currentTarget.getAttribute("itemid")
-        const toString = id as string
-        setFavoriteItems(
-            favoriteItems.filter(item => item !== toString)
-        )
+        for (var j = 0; j < boardList.length; j++) {
+            if (id === boardList[j].board_name) {
+                // setFavoriteItems(
+                //     favoriteList.filter(item => item.board_name !== id)
+                // )
+                console.log('remove')
+            }
+        }
     }
 
-    console. log("BOARD LIST : ", boardList)
+    console.log("BOARD LIST : ", boardList)
+    console.log('FAV LIST : ', favoriteList)
 
     return (
         <div style={{
@@ -80,11 +94,16 @@ const HomeBoard: React.FC<Props> = ({id}) => {
             </div>
             <div style={{textAlign: 'center' }}>
                 <Grid container spacing={3}>
-                        {favoriteItems.map((value: string, index: number) => (
-                            <Grid key={index} item xs={4}>
-                                <HomeCard addItems={removeItems} title={value} favorite={true} color={"a"} id={"a"} url={"a"}/>
-                            </Grid>
-                        ))}
+                    {
+                        favoriteList &&
+                        <>
+                            {favoriteList.map((i: any, index: number) => (
+                                <Grid key={index} item xs={4}>
+                                    <HomeCard key={index} id={id} addItems={removeItems} color={i.bg_color} title={i.board_name} favorite={true} url={i.url}/>
+                                </Grid>
+                            ))}
+                        </>
+                    }
                 </Grid>
             </div>
 

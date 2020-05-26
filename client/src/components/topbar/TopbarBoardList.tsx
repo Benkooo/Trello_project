@@ -1,4 +1,4 @@
-import React, {useState} from 'react'
+import React, {useState, useEffect } from 'react'
 import {Menu, ListItemText, Collapse, List, ListItem, TextField, Typography } from '@material-ui/core'
 import StarBorderIcon from '@material-ui/icons/StarBorder';
 import ExpandLess from '@material-ui/icons/ExpandLess';
@@ -6,6 +6,7 @@ import ExpandMore from '@material-ui/icons/ExpandMore';
 import PersonOutlineIcon from '@material-ui/icons/PersonOutline';
 import BoardListItem from './BoardListItem';
 import CreateBoard from '../utils/CreateBoard';
+import axios from 'axios'
 
 interface Props {
     anchorEl: any,
@@ -20,6 +21,28 @@ const TopbarBoardList: React.FC<Props> = ({
     const [open, setOpen ] = useState(true)
     const [openPerso, setOpenPerso] = useState(true)
     const [ openCreateBoard, setOpenCreateBoard ] = useState(false)
+    const [ boardList, setBoardList ] = useState([])
+
+    const getBoards = (id: string) => {
+
+        axios.get('http://localhost:5000/get_personal_boards', {
+            headers: {
+                unique_login: id
+            }
+        })
+        .then(res => {
+            console.log(res.data.data)
+            setBoardList(res.data.data)
+        })
+        .catch(err => {
+            console.error(err)
+        })
+    }
+
+    useEffect(() => {
+        if (id)
+            getBoards(id)
+    }, []);
 
     const handleClickOpenCreateBoard = () => {
         setOpenCreateBoard(true)
