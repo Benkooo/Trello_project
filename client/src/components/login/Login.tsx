@@ -48,7 +48,8 @@ export const requestLogin = async (email: string, password: string) : Promise<[b
         ).json()) as LoginResponse;
         if (response.success) {
             console.log("LA REPONSE: ", response)
-            storeString("userEmail", email);
+            storeString("email", email);
+            storeString("username", response.username);
             return [response.success, response.message, response.unique_login];
         } else {
             return [response.success, response.message, ""];
@@ -69,12 +70,10 @@ const Login = (props: Props) => {
     const [success, setSuccess] = useState(false);
     const [error, setError] = useState(false);
     const [message, setMessage] = useState("")
-    const [favoriteItems] = useState(Array<number>())
-
+    const vertical = 'top'
+    const horizontal = 'center'
 
     const handleButtonClick = () => {
-        favoriteItems.push(32)
-        console.log(favoriteItems)
         if (!loading) {
             setLoading(true);
             timer.current = setTimeout(() => {
@@ -101,13 +100,13 @@ const Login = (props: Props) => {
                 }}
             >
                 <Typography variant="h6" gutterBottom style={{color: "grey", display: "flex", justifyContent: "center"}}>
-                    Connect to your account
+                    Log in to EpiTrello
                 </Typography>
                 {loading && <CircularProgress size={48} className={classes.buttonProgress}/>}
                 <TextField
                     className={classes.textField}
                     id="standard-basic"
-                    label="Username"
+                    label="Enter email"
                     autoFocus
                     value={username}
                     onChange={(sender: any) => setUsername(sender.target.value)}
@@ -116,7 +115,7 @@ const Login = (props: Props) => {
                     className={classes.textField}
                     id="standard-password-input"
                     type="password"
-                    label="Password"
+                    label="Enter password"
                     value={password}
                     onChange={(sender: any) => setPassword(sender.target.value)}
                 />
@@ -151,15 +150,15 @@ const Login = (props: Props) => {
                         style={{ marginTop: "20px", fontSize: "12px"}}
                         onClick={() => props.setDisplayRegister(true)}
                     >
-                        Not registered yet ?
+                        Sign up for an account
                     </Button>
                 </div>
-                <Snackbar style={{marginBottom: '900px'}} open={success} autoHideDuration={6000} onClose={handleClose}>
+                <Snackbar anchorOrigin={{vertical, horizontal}} open={success} autoHideDuration={6000} onClose={handleClose}>
                     <Alert onClose={handleClose} severity="success">
                         {message}
                     </Alert>
                 </Snackbar>
-                <Snackbar style={{marginBottom: '900px'}} open={error} autoHideDuration={6000} onClose={handleClose}>
+                <Snackbar anchorOrigin={{vertical, horizontal}} open={error} autoHideDuration={6000} onClose={handleClose}>
                     <Alert onClose={handleClose} severity="error">
                         {message}
                     </Alert>
