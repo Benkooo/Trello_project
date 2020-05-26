@@ -276,13 +276,13 @@ class Database:
             url = ''.join(random.SystemRandom().choice(string.ascii_uppercase + string.digits) for _ in range(20))
         return url
 
-    def _new_board(self, board_name, backgroud_pic):
+    def _new_board(self, board_name, bg_color):
         try:
             url = self.generate_url()
             board_id = 0
             with self.connection.cursor() as cursor:
-                sql = "INSERT INTO boards (board_name, backgroud_pic, url) VALUES (%s, %s, %s)"
-                cursor.execute(sql, (board_name, backgroud_pic, url))
+                sql = "INSERT INTO boards (board_name, bg_color, url) VALUES (%s, %s, %s)"
+                cursor.execute(sql, (board_name, bg_color, url))
                 board_id = cursor.lastrowid
 
             self.connection.commit()
@@ -338,9 +338,9 @@ class Database:
         finally:
             self.connection.close()
 
-    def create_board(self, team_name, board_name, backgroud_pic, username):
+    def create_board(self, team_name, board_name, bg_color, username):
         try:
-            board_id = Database()._new_board(board_name, backgroud_pic)
+            board_id = Database()._new_board(board_name, bg_color)
             user_id = Database().get_userid_from_username(username)
             if team_name == '':
                 unique_id = ''.join(random.SystemRandom().choice(string.ascii_uppercase + string.digits) for _ in range(200))
@@ -418,7 +418,7 @@ class Database:
     def _get_user_board_personal_from_unique_id(self, unique_id):
         try:
             with self.connection.cursor() as cursor:
-                sql = "SELECT starred, backgroud_pic, board_name, url FROM user_boards JOIN boards ON boards.id = user_boards.board_id WHERE unique_id=%s AND team=%s"
+                sql = "SELECT starred, bg_color, board_name, url FROM user_boards JOIN boards ON boards.id = user_boards.board_id WHERE unique_id=%s AND team=%s"
                 cursor.execute(sql, (unique_id, False))
                 result = cursor.fetchone()
                 return result
@@ -434,7 +434,7 @@ class Database:
                 tmp = {
                     'members': elem['members'],
                     'starred': False if res['starred'] == b'\x00' else True,
-                    'backgroud_pic': res['backgroud_pic'],
+                    'bg_color': res['bg_color'],
                     'board_name': res['board_name'],
                     'url': res['url']
                 }
@@ -446,7 +446,7 @@ class Database:
     def _get_user_board_team_from_unique_id(self, unique_id):
         try:
             with self.connection.cursor() as cursor:
-                sql = "SELECT starred, backgroud_pic, board_name, url FROM user_boards JOIN boards ON boards.id = user_boards.board_id WHERE unique_id=%s AND team=%s"
+                sql = "SELECT starred, bg_color, board_name, url FROM user_boards JOIN boards ON boards.id = user_boards.board_id WHERE unique_id=%s AND team=%s"
                 cursor.execute(sql, (unique_id, True))
                 result = cursor.fetchall()
                 return result
@@ -464,7 +464,7 @@ class Database:
                     'boards': [
                         {
                             'starred': False if board['starred'] == b'\x00' else True,
-                            'backgroud_pic': board['backgroud_pic'],
+                            'bg_color': board['bg_color'],
                             'url': board['url'],
                             'board_name': board['board_name']
                         } for board in res],

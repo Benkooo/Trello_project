@@ -33,7 +33,7 @@ CREATE TABLE IF NOT EXISTS user_boards (
 CREATE TABLE IF NOT EXISTS boards (
     id int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
     board_name varchar(255) COLLATE utf8_bin NOT NULL,
-    backgroud_pic varchar(255) COLLATE utf8_bin,
+    bg_color varchar(255) COLLATE utf8_bin,
     url varchar(255) UNIQUE COLLATE utf8_bin NOT NULL
 );
 

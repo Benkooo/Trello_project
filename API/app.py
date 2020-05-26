@@ -8,6 +8,8 @@ import string
 
 import db
 
+import sys
+
 app = Flask(__name__)
 app.config["SECRET_KEY"] = ''.join(random.SystemRandom().choice(string.ascii_uppercase + string.digits) for _ in range(128))
 CORS(app)
@@ -168,16 +170,17 @@ def remove_team_member():
 
 @app.route('/add_board', methods=['POST'])
 def add_board():
+    print(request.json, file=sys.stderr)
     username = get_username(request.headers)
     if username is None:
         return jsonify({'success': False, 'message': 'Please log in'})
-    if not all(_ in request.json for _ in ('board_name', 'team_name', 'backgroud_pic')):
+    if not all(_ in request.json for _ in ('board_name', 'team_name', 'bg_color')):
         return jsonify({'success': False, 'message': 'Please provide all informations'})
     if (request.json['team_name'] != '') and (not db.Database().team_name_exists(request.json['team_name'])):
         return jsonify({'success': False, 'message': "The team name doesn't exists"})
     if db.Database().board_exists(request.json['team_name'], request.json['board_name'], username):
         return jsonify({'success': False, 'message': "There is already a board with the same name"})
-    if not db.Database().create_board(request.json['team_name'], request.json['board_name'], request.json['backgroud_pic'], username):
+    if not db.Database().create_board(request.json['team_name'], request.json['board_name'], request.json['bg_color'], username):
         return jsonify({'success': False, 'message': "Could not create new board"})
     return jsonify({'success': True, 'message': 'Successfully added new board'})
 
