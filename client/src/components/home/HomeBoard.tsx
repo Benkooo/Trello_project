@@ -16,7 +16,7 @@ const HomeBoard: React.FC<Props> = ({id}) => {
     const [ favoriteItems, setFavoriteItems ] = useState(Array<string>())
     const [ open, setOpen ] = useState(false)
     const [ boardList, setBoardList] = useState([])
-    
+
     const getBoards = (id: string) => {
     
         axios.get('http://localhost:5000/get_personal_boards', {
@@ -64,7 +64,7 @@ const HomeBoard: React.FC<Props> = ({id}) => {
         )
     }
 
-    console.log("BOARD LIST : ", boardList)
+    console. log("BOARD LIST : ", boardList)
 
     return (
         <div style={{
