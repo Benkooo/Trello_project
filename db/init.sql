@@ -5,7 +5,8 @@ CREATE TABLE IF NOT EXISTS users (
     id int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
     username varchar(255) UNIQUE COLLATE utf8_bin NOT NULL,
     email varchar(255) UNIQUE COLLATE utf8_bin NOT NULL,
-    password varchar(255) COLLATE utf8_bin NOT NULL
+    password varchar(255) COLLATE utf8_bin NOT NULL,
+    unique_login varchar(255) UNIQUE COLLATE utf8_bin NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS teams (
@@ -32,13 +33,19 @@ CREATE TABLE IF NOT EXISTS user_boards (
 CREATE TABLE IF NOT EXISTS boards (
     id int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
     board_name varchar(255) COLLATE utf8_bin NOT NULL,
-    backgroud_pic varchar(255) COLLATE utf8_bin,
+    bg_color varchar(255) COLLATE utf8_bin,
     url varchar(255) UNIQUE COLLATE utf8_bin NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS labels (
     id int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    color varchar(255) UNIQUE COLLATE utf8_bin NOT NULL,
-    text varchar(255) UNIQUE COLLATE utf8_bin NOT NULL,
+    color varchar(255) COLLATE utf8_bin NOT NULL,
+    text varchar(255) COLLATE utf8_bin NOT NULL,
     board_id int(11) NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS board_data (
+    id int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    board_id int(11) UNIQUE NOT NULL,
+    json varchar(255) COLLATE utf8_bin NOT NULL
 );

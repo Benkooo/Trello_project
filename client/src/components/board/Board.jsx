@@ -4,12 +4,6 @@ import {Button, Typography} from "@material-ui/core";
 import AddIcon from "@material-ui/icons/Add";
 import BoardColumn from "./BoardColumn";
 
-const getList = (nb, count, offset = 0) =>
-    Array.from({length: nb}, (v, k) => k).map(k => ({
-        id: `list-${nb}`,
-        content: getItems(count, offset)
-    }));
-
 const getNewListId = (items) => {
     let i = 0;
     for (i = 0; items[i]; i++);
@@ -82,18 +76,31 @@ export default class Board extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            items: [[getItems(10), "list-0"], [getItems(5, 10), "list-1"]],
+            items: [[getItems(0), "list-0"]],
             itemsHor: getItemsHor(5),
-            focused: false
+            focused: false,
+            isColDisabled: false,
+            isRowDisabled: false
         };
         this.onDragEndHor = this.onDragEndHor.bind(this);
         this.addElement = this.addElement.bind(this);
+    }
+
+    onDragStart = (result) => {
+        console.log("RESULT: ", result);
+        if (result.draggableId.includes("list")) {
+            this.setState({isRowDisabled: true})
+        } else {
+            this.setState({isColDisabled: true})
+        }
     }
 
     onDragEnd = (result) => {
         console.log("GAIOJEGIOJEAIGA3");
         const { source, destination } = result;
         console.log("SD:", source, destination);
+
+        this.setState({isColDisabled: false, isRowDisabled: false});
 
         if (!destination) {
             return;
@@ -102,6 +109,7 @@ export default class Board extends React.Component {
         const dInd = +destination.droppableId;
 
         if (source.droppableId === "droppable" || destination.droppableId === "droppable" ) {
+            if (source.droppableId !== "droppable" || destination.droppableId !== "droppable" ) {return;}
             const cpy = this.state.items.slice();
             const tmp = cpy[source.index];
             cpy[source.index] = cpy[destination.index];
@@ -148,12 +156,11 @@ export default class Board extends React.Component {
 
     render() {
         console.log("1: ", this.state.items);
-        console.log("2: ", [getList(1, 10), getList(2, 5, 10)]);
         return (
             <div>
                 <div style={{display: "flex"}}>
-                    <DragDropContext onDragEnd={this.onDragEnd}>
-                        <Droppable droppableId="droppable" direction="horizontal">
+                    <DragDropContext onDragEnd={this.onDragEnd} onDragStart={this.onDragStart}>
+                        <Droppable droppableId="droppable" direction="horizontal" isDropDisabled={this.state.isColDisabled}>
                             {(provided, snapshot) => (
                                 <div
                                     ref={provided.innerRef}
@@ -161,7 +168,7 @@ export default class Board extends React.Component {
                                     {...provided.droppableProps}
                                 >
                                     {this.state.items.map((el, ind) => (
-                                        <Draggable key={el[1]} draggableId={el[1]} index={ind}>
+                                        <Draggable key={el[1]} draggableId={el[1]} index={ind} isDragDisabled={this.state.isColDisabled}>
                                             {(provided, snapshot) => (
                                                 <div
                                                     ref={provided.innerRef}
@@ -172,9 +179,9 @@ export default class Board extends React.Component {
                                                         provided.draggableProps.style
                                                     )}
                                                 >
-                                                    <Droppable key={ind} droppableId={`${ind}`}>
+                                                    <Droppable key={ind} droppableId={`${ind}`} isDropDisabled={this.state.isRowDisabled}>
                                                         {(provided, snapshot) => (
-                                                            <BoardColumn addElement={this.addElement} items={this.state.items} snapshot={snapshot} provided={provided} element={el[0]} index={ind}/>
+                                                            <BoardColumn isRowDisabled={this.state.isRowDisabled} addElement={this.addElement} items={this.state.items} snapshot={snapshot} provided={provided} element={el[0]} index={ind}/>
                                                         )}
                                                     </Droppable>
                                                 </div>

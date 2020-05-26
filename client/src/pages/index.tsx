@@ -1,5 +1,5 @@
 import LoginController from "../components/login/LoginController";
-import Topbar from '../components/Topbar'
+import Topbar from "../components/topbar/Topbar";
 // import {makeStyles} from "@material-ui/styles";
 // import {createStyles} from "@material-ui/core";
 
@@ -25,7 +25,6 @@ const IndexPage = () => {
     return (
         <div>
             <div>
-                <Topbar />
                 <LoginController/>
             </div>
         </div>

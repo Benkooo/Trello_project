@@ -1,4 +1,4 @@
-import Topbar from '../components/Topbar'
+import Topbar from "../components/topbar/Topbar";
 // import {makeStyles} from "@material-ui/styles";
 // import {useStyles} from '@material-ui/core'
 import {Box, Paper, Tab, Tabs, Typography} from "@material-ui/core";
@@ -42,7 +42,7 @@ const ProfilePage = () => {
         // <div className={classes.root}  style={{ height: "100%", textAlign: "center"}}>
         <div style={{ height: "100%", textAlign: "center"}}>
             <div>
-                <Topbar />
+                <Topbar id="coco"/>
                 Profile
                 <Paper>
                     <Tabs

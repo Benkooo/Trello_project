@@ -103,7 +103,7 @@ const Register = (props: Props) => {
                     required
                     className={classes.textField}
                     id="emailRegister"
-                    label="E-mail"
+                    label="Username"
                     autoFocus
                     value={email}
                     onChange={(sender: any) => setEmail(sender.target.value)}
@@ -112,7 +112,7 @@ const Register = (props: Props) => {
                     required
                     className={classes.textField}
                     id="nameRegister"
-                    label="Nom complet"
+                    label="Full name"
                     value={username}
                     onChange={(sender: any) => setUsername(sender.target.value)}
                 />
@@ -121,7 +121,7 @@ const Register = (props: Props) => {
                     className={classes.textField}
                     id="standard-password-input"
                     type="password"
-                    label="Mot de passe"
+                    label="Password"
                     value={password}
                     onChange={(sender: any) => setPassword(sender.target.value)}
                 />
@@ -130,7 +130,7 @@ const Register = (props: Props) => {
                     className={classes.textField}
                     id="standard-confirm-password-input"
                     type="password"
-                    label="Confirmer le mot de passe"
+                    label="Confirm password"
                     value={cPassword}
                     onChange={(sender: any) => setCPassword(sender.target.value)}
                 />
@@ -152,25 +152,25 @@ const Register = (props: Props) => {
                             })
                         }}
                     >
-                        S'inscrire
+                        Register
                     </Button>
                 </div>
                 <Divider variant={"middle"}/>
-                <div>
+                <div style={{display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
                     <Button
                         color="primary"
                         style={{ marginTop: "20px", fontSize: "12px"}}
                         onClick={() => props.setDisplayRegister(false)}
                     >
-                        Vous avez déja un compte ? Connectez vous
+                        Already registered ? Log in
                     </Button>
                 </div>
-                <Snackbar open={success} autoHideDuration={6000} onClose={handleClose}>
+                <Snackbar style={{marginBottom: '900px'}} open={success} autoHideDuration={6000} onClose={handleClose}>
                     <Alert onClose={handleClose} severity="success">
                         {message}
                     </Alert>
                 </Snackbar>
-                <Snackbar open={error} autoHideDuration={6000} onClose={handleClose}>
+                <Snackbar style={{marginBottom: '900px'}} open={error} autoHideDuration={6000} onClose={handleClose}>
                     <Alert onClose={handleClose} severity="error">
                         {message}
                     </Alert>

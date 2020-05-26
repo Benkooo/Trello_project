@@ -29,7 +29,7 @@ function Alert(props: AlertProps) {
     return <MuiAlert elevation={6} variant="filled" {...props} />;
 }
 
-export const requestLogin = async (email: string, password: string) : Promise<[boolean, string]> => {
+export const requestLogin = async (email: string, password: string) : Promise<[boolean, string, string]> => {
     const headers = new Headers();
     headers.append("Content-Type", "application/json");
 
@@ -47,14 +47,15 @@ export const requestLogin = async (email: string, password: string) : Promise<[b
             })
         ).json()) as LoginResponse;
         if (response.success) {
+            console.log("LA REPONSE: ", response)
             storeString("userEmail", email);
-            return [response.success, response.message];
+            return [response.success, response.message, response.unique_login];
         } else {
-            return [response.success, response.message];
+            return [response.success, response.message, ""];
         }
     } catch (error) {
         // ERROR
-        return [false, "Connection error"]
+        return [false, "Connection error", ""]
     }
 };
 
@@ -97,13 +98,13 @@ const Login = (props: Props) => {
                 }}
             >
                 <Typography variant="h6" gutterBottom style={{color: "grey", display: "flex", justifyContent: "center"}}>
-                    Se connecter à EpiTrello
+                    Connect to your account
                 </Typography>
                 {loading && <CircularProgress size={48} className={classes.buttonProgress}/>}
                 <TextField
                     className={classes.textField}
                     id="standard-basic"
-                    label="E-mail"
+                    label="Username"
                     autoFocus
                     value={username}
                     onChange={(sender: any) => setUsername(sender.target.value)}
@@ -112,7 +113,7 @@ const Login = (props: Props) => {
                     className={classes.textField}
                     id="standard-password-input"
                     type="password"
-                    label="Mot de passe"
+                    label="Password"
                     value={password}
                     onChange={(sender: any) => setPassword(sender.target.value)}
                 />
@@ -126,7 +127,10 @@ const Login = (props: Props) => {
                             requestLogin(username, sha256(password)).then(function(value) {
                                 if (value[0]) {
                                     setSuccess(true)
-                                    Router.push("/home")
+                                    Router.push({
+                                        pathname: '/home',
+                                        query: { id: value[2]}
+                                    })
                                 }
                                 else
                                     setError(true)
@@ -134,7 +138,7 @@ const Login = (props: Props) => {
                             })
                         }}
                     >
-                        Se connecter
+                        Log in
                     </Button>
                 </div>
                 <Divider variant={"middle"}/>
@@ -144,15 +148,15 @@ const Login = (props: Props) => {
                         style={{ marginTop: "20px", fontSize: "12px"}}
                         onClick={() => props.setDisplayRegister(true)}
                     >
-                        Inscivez-vous à un compte
+                        Not registered yet ?
                     </Button>
                 </div>
-                <Snackbar open={success} autoHideDuration={6000} onClose={handleClose}>
+                <Snackbar style={{marginBottom: '900px'}} open={success} autoHideDuration={6000} onClose={handleClose}>
                     <Alert onClose={handleClose} severity="success">
                         {message}
                     </Alert>
                 </Snackbar>
-                <Snackbar open={error} autoHideDuration={6000} onClose={handleClose}>
+                <Snackbar style={{marginBottom: '900px'}} open={error} autoHideDuration={6000} onClose={handleClose}>
                     <Alert onClose={handleClose} severity="error">
                         {message}
                     </Alert>

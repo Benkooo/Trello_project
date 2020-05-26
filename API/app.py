@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request, session
+from flask import Flask, jsonify, request
 from flask_cors import CORS
 
 import config
@@ -8,68 +8,78 @@ import string
 
 import db
 
+import sys
+
 app = Flask(__name__)
 app.config["SECRET_KEY"] = ''.join(random.SystemRandom().choice(string.ascii_uppercase + string.digits) for _ in range(128))
 CORS(app)
 
 @app.route('/', methods=['GET'])
 def home():
-    if not session.get('logged_in'):
+    username = get_username(request.headers)
+    if username is None:
         return jsonify({'success': False, 'message': 'please log in'})
     return jsonify({'success': True})
+
+def get_username(header):
+    if 'unique_login' not in header:
+        return None
+    return db.Database().get_username_from_unique_login(header['unique_login'])
+
+def is_logged_in(header):
+    if get_username(header) is None:
+        return False
+    return True
 
 @app.route('/register', methods=['POST'])
 def register():
     if not all(_ in request.json for _ in ('password', 'username', 'email')):
         return jsonify({'success': False, 'message': 'Please provide all informations'})
     if db.Database().add_user(request.json['username'], request.json['email'], request.json['password']):
-        session['logged_in'] = True
-        session['username'] = request.json['username']
         return jsonify({'success': True, 'message': 'Registered successfully'})
-    else:
-        return jsonify({'success': False, 'message': 'The username or the email exists'})
+    return jsonify({'success': False, 'message': 'The username or the email exists'})
 
 @app.route('/login', methods=['POST'])
 def login():
     if not all(_ in request.json for _ in ('password', 'email')):
         return jsonify({'success': False, 'message': 'please provide all informations'})
-    my_db = db.Database()
-    if my_db.check_password(request.json['email'], request.json['password']):
-        session['logged_in'] = True
-        session['username'] = db.Database().get_username_from_email(request.json['email'])
-        return jsonify({'success': True, 'message': 'Successfully logged in', 'username': session['username']})
-    else:
-        return jsonify({'success': False, 'message': 'username or password is false'})
+    if db.Database().check_password(request.json['email'], request.json['password']):
+        username, unique_login = db.Database().get_username_unique_login_from_email(request.json['email'])
+        return jsonify({'success': True, 'message': 'Successfully logged in', 'username': username, 'unique_login': unique_login})
+    return jsonify({'success': False, 'message': 'username or password is false'})
 
 @app.route('/logout', methods=['POST'])
 def logout():
-    session['logged_in'] = False
-    if 'username' in session:
-        del session['username']
     return jsonify({'success': True, 'message': 'Successfully logged out'})
 
 @app.route('/update_username', methods=['POST'])
 def update_username():
-    if not ('logged_in' in session and session['logged_in'] and 'username' in session):
+    #if not ('logged_in' in session and session['logged_in'] and 'username' in session):
+    #    return jsonify({'success': False, 'message': 'Please log in'})
+    username = get_username(request.headers)
+    if username is None:
         return jsonify({'success': False, 'message': 'Please log in'})
     if not all(_ in request.json for _ in ('old_username', 'new_username')):
         return jsonify({'success': False, 'message': 'Please provide all informations'})
-    if session['username'] != request.json['old_username']:
+    if username != request.json['old_username']:
         return jsonify({'success': False, 'message': 'Incorrect username'})
     if request.json['old_username'] == request.json['new_username']:
         return jsonify({'success': False, 'message': 'Usernames are the same'})
     if db.Database().update_username(request.json['old_username'], request.json['new_username']):
-        session['username'] = request.json['new_username']
+        #session['username'] = request.json['new_username']
         return jsonify({'success': True, 'message': 'Successfully updated username'})
     return jsonify({'success': False, 'message': "Could not update username"})
 
 @app.route('/update_password', methods=['POST'])
 def update_password():
-    if not ('logged_in' in session and session['logged_in'] and 'username' in session):
+    #if not ('logged_in' in session and session['logged_in'] and 'username' in session):
+    #    return jsonify({'success': False, 'message': 'Please log in'})
+    username = get_username(request.headers)
+    if username is None:
         return jsonify({'success': False, 'message': 'Please log in'})
     if not all(_ in request.json for _ in ('old_password', 'new_password', 'username')):
         return jsonify({'success': False, 'message': 'Please provide all informations'})
-    if session['username'] != request.json['username']:
+    if username != request.json['username']:
         return jsonify({'success': False, 'message': 'Incorrect username'})
     if request.json['old_password'] == request.json['new_password']:
         return jsonify({'success': False, 'message': 'Passwords are the same'})
@@ -79,11 +89,12 @@ def update_password():
 
 @app.route('/update_email', methods=['POST'])
 def update_email():
-    if not ('logged_in' in session and session['logged_in'] and 'username' in session):
+    username = get_username(request.headers)
+    if username is None:
         return jsonify({'success': False, 'message': 'Please log in'})
     if not all(_ in request.json for _ in ('old_email', 'new_email', 'username')):
         return jsonify({'success': False, 'message': 'Please provide all informations'})
-    if session['username'] != request.json['username']:
+    if username != request.json['username']:
         return jsonify({'success': False, 'message': 'Incorrect username'})
     if request.json['old_email'] == request.json['new_email']:
         return jsonify({'success': False, 'message': 'Emails are the same'})
@@ -94,33 +105,34 @@ def update_email():
 
 @app.route('/add_team', methods=['POST'])
 def add_team():
-    if not ('logged_in' in session and session['logged_in'] and 'username' in session):
+    username = get_username(request.headers)
+    if username is None:
         return jsonify({'success': False, 'message': 'Please log in'})
     if not all(_ in request.json for _ in ('team_name', 'team_members')):
         return jsonify({'success': False, 'message': 'Please provide all informations'})
-    if not db.Database().add_team(request.json['team_name'], [session['username']] + request.json['team_members']):
+    if not db.Database().add_team(request.json['team_name'], [username] + request.json['team_members']):
         return jsonify({'success': False, 'message': 'Verify team members spelling, or user already in team'})
     return jsonify({'success': True, 'message': 'Successfully added new team'})
 
 @app.route('/add_team_members', methods=['POST'])
 def add_team_members():
-    if not ('logged_in' in session and session['logged_in'] and 'username' in session):
+    username = get_username(request.headers)
+    if username is None:
         return jsonify({'success': False, 'message': 'Please log in'})
     if not all(_ in request.json for _ in ('team_name', 'team_members')):
         return jsonify({'success': False, 'message': 'Please provide all informations'})
     if not db.Database().team_name_exists(request.json['team_name']):
         return jsonify({'success': False, 'message': "The team name doesn't exists"})
-    if not db.Database().add_team_members(request.json['team_name'], request.json['team_members'], session['username']):
+    if not db.Database().add_team_members(request.json['team_name'], request.json['team_members'], username):
         return jsonify({'success': False, 'message': 'Verify team members spelling, or user already in team'})
     return jsonify({'success': True, 'message': f"Successfully added new team member{'s' if len(request.json['team_members']) > 1 else ''}"})
 
 @app.route('/get_teams', methods=['GET'])
 def get_teams():
-    if not ('logged_in' in session and session['logged_in'] and 'username' in session):
+    username = get_username(request.headers)
+    if username is None:
         return jsonify({'success': False, 'message': 'Please log in'})
-    data = db.Database().get_teams(session['username'])
-    print(data)
-    return jsonify({'success': True, 'message': 'ok', 'data': data})
+    return jsonify({'success': True, 'message': 'ok', 'data': db.Database().get_teams(username)})
 
 """
 {
@@ -129,7 +141,8 @@ team_name: "my team"
 """
 @app.route('/remove_team', methods=['POST'])
 def remove_team():
-    if not ('logged_in' in session and session['logged_in'] and 'username' in session):
+    username = get_username(request.headers)
+    if username is None:
         return jsonify({'success': False, 'message': 'Please log in'})
     if not all(_ in request.json for _ in ('team_name',)):
         return jsonify({'success': False, 'message': 'Please provide all informations'})
@@ -144,7 +157,8 @@ team_member: "jaques"
 """
 @app.route('/remove_team_member', methods=['POST'])
 def remove_team_member():
-    if not ('logged_in' in session and session['logged_in'] and 'username' in session):
+    username = get_username(request.headers)
+    if username is None:
         return jsonify({'success': False, 'message': 'Please log in'})
     if not all(_ in request.json for _ in ('team_name', 'team_member')):
         return jsonify({'success': False, 'message': 'Please provide all informations'})
@@ -154,44 +168,64 @@ def remove_team_member():
     return jsonify({'success': True, 'message': 'Successfully removed team member'})
 
 
-
-
-"""
-{
-board_name: "test",
-team_name: "" -> si chaine vide c'est une board perso, sinon en team
-"""
 @app.route('/add_board', methods=['POST'])
 def add_board():
-    if not ('logged_in' in session and session['logged_in'] and 'username' in session):
+    print(request.json, file=sys.stderr)
+    username = get_username(request.headers)
+    if username is None:
         return jsonify({'success': False, 'message': 'Please log in'})
-    if not all(_ in request.json for _ in ('board_name', 'team_name')):
+    if not all(_ in request.json for _ in ('board_name', 'team_name', 'bg_color')):
         return jsonify({'success': False, 'message': 'Please provide all informations'})
-    print(session['username'])
-    print(request.json['board_name'])
-    print(request.json['team_name'])
     if (request.json['team_name'] != '') and (not db.Database().team_name_exists(request.json['team_name'])):
         return jsonify({'success': False, 'message': "The team name doesn't exists"})
-
-    db.Database().create_board(request.json['team_name'], request.json['board_name'], './static/abcd.jpeg', session['username'])
+    if db.Database().board_exists(request.json['team_name'], request.json['board_name'], username):
+        return jsonify({'success': False, 'message': "There is already a board with the same name"})
+    if not db.Database().create_board(request.json['team_name'], request.json['board_name'], request.json['bg_color'], username):
+        return jsonify({'success': False, 'message': "Could not create new board"})
     return jsonify({'success': True, 'message': 'Successfully added new board'})
 
 @app.route('/get_personal_boards', methods=['GET'])
-def boards():
-    if not ('logged_in' in session and session['logged_in'] and 'username' in session):
+def get_personal_boards():
+    username = get_username(request.headers)
+    if username is None:
         return jsonify({'success': False, 'message': 'Please log in'})
-    data = db.Database().get_personal_boards(session['username'])
-    return jsonify({'success': True, 'message': 'ok', 'data': data})
+    return jsonify({'success': True, 'message': 'ok', 'data': db.Database().get_personal_boards(username)})
+
+@app.route('/get_team_boards', methods=['GET'])
+def get_team_boards():
+    username = get_username(request.headers)
+    if username is None:
+        return jsonify({'success': False, 'message': 'Please log in'})
+    return jsonify({'success': True, 'message': 'ok', 'data': db.Database().get_team_boards(username)})
+
+@app.route('/<url>/change_board_data', methods=['POST'])
+def change_board_data(url):
+    username = get_username(request.headers)
+    if username is None:
+        return jsonify({'success': False, 'message': 'Please log in'})
+    if not all(_ in request.json for _ in ('json',)):
+        return jsonify({'success': False, 'message': 'Please provide all informations'})
+    if not db.Database().change_board_data(url, request.json['json']):
+        return jsonify({'success': False, 'message': "Could not change board informations"})
+    return jsonify({'success': True, 'message': 'Successfully changed board informations'})
+
+@app.route('/<url>/get_board_data', methods=['POST'])
+def get_board_data(url):
+    username = get_username(request.headers)
+    if username is None:
+        return jsonify({'success': False, 'message': 'Please log in'})
+    return jsonify({'success': True, 'message': 'ok', 'data': db.Database().get_board_data(url)})
 
 
 
 
 
 
-@app.route('/add_list', methods=['POST'])
+
+"""@app.route('/add_list', methods=['POST'])
 def add_list():
     print('adding list')
-    return jsonify({'success': True, 'message': 'Successfully added list'})
+    return jsonify({'success': True, 'message': 'Successfully added list'})"""
 
 """
 {
@@ -202,7 +236,8 @@ def add_list():
   column_name: "First_column"
 }
 """
-@app.route('/add_card', methods=['POST'])
+
+"""@app.route('/add_card', methods=['POST'])
 def add_card():
     print(request.json)
     return jsonify({'success': True, 'message': 'Successfully added card'})
@@ -212,7 +247,7 @@ def modify_card(card_id):
     print(card_id)
     print(request.json)
     return jsonify({'success': True, 'message': 'Successfully modified card'})
-
+"""
 if __name__ == "__main__":
     app.run(host=config.FLASK_HOST,
             port=config.FLASK_PORT,
