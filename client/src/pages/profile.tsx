@@ -1,5 +1,4 @@
 import Topbar from "../components/topbar/Topbar";
-import ProfileController from "../components/profile/ProfileController";
 import React from "react";
 
 
@@ -8,7 +7,6 @@ const ProfilePage = () => {
         <div style={{ height: "100%", textAlign: "center"}}>
             <div>
                 <Topbar id="coco"/>
-                <ProfileController/>
             </div>
         </div>
     );
