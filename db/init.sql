@@ -47,5 +47,5 @@ CREATE TABLE IF NOT EXISTS labels (
 CREATE TABLE IF NOT EXISTS board_data (
     id int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
     board_id int(11) UNIQUE NOT NULL,
-    json varchar(MAX) COLLATE utf8_bin NOT NULL
+    json BLOB COLLATE utf8_bin NOT NULL
 );
