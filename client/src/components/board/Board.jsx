@@ -7,6 +7,7 @@ import {LoginResponse} from "../../interfaces/requests";
 import {storeString} from "../../helpers/SessionStorageHelper";
 import axios from "axios";
 import StarBorderIcon from "@material-ui/icons/StarBorder";
+import {useRouter} from "next/router";
 
 const StyledButton = withStyles({
     root: {
@@ -119,7 +120,7 @@ export default class Board extends React.Component {
 
     componentDidMount() {
         const id = localStorage.getItem("id");
-        const url = localStorage.getItem("url");
+        const url = this.state.boardParams.url;
         console.log("ID", id);
         console.log("ID", url);
         axios.post('http://localhost:5000/' + url + '/get_board_data', {
@@ -144,6 +145,7 @@ export default class Board extends React.Component {
         cpy[index][2] = text;
         console.log(cpy);
         this.setState({items: cpy})
+        this.updateData()
     }
 
     onDragStart = (result) => {
@@ -281,6 +283,7 @@ export default class Board extends React.Component {
                                         background: "rgba(255, 255, 255, 0.25)",}}
                                         onClick={() => {
                                         this.setState({items: [...this.state.items, [[], getNewListId(this.state.items), "Enter list title..."]]});
+                                        this.updateData()
                                     }}>
                                         <AddIcon/>
                                         <Typography> Add another list </Typography>
