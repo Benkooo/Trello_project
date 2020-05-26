@@ -67,8 +67,7 @@ class Database:
 
             self.connection.commit()
             return True
-        except Exception as e:
-            print(e)
+        except:
             return False
         finally:
             self.connection.close()
@@ -208,7 +207,6 @@ class Database:
         team_members = list(set(team_members))
         try:
             data = []
-            ##ajouter une boucle pour le random
             for username in team_members:
                 user_id = Database().get_userid_from_username(username)
                 if user_id is None:
@@ -227,6 +225,112 @@ class Database:
         finally:
             self.connection.close()
 
+    def get_board_ids_from_unique_id(self, unique_id):
+        try:
+            with self.connection.cursor() as cursor:
+                sql = "SELECT board_id FROM user_boards WHERE unique_id=%s"
+                cursor.execute(sql, (unique_id,))
+                result = cursor.fetchall()
+                return result
+        finally:
+            self.connection.close()
+
+    def remove_teams(self, team_name, username):
+        try:
+            user_id = Database().get_userid_from_username(username)
+            unique_id = Database()._get_teams_unique_id(team_name, user_id)
+            board_ids = [elem['board_id'] for elem in Database().get_board_ids_from_unique_id(unique_id)]
+            with self.connection.cursor() as cursor:
+                sql = "DELETE FROM boards WHERE id=%s"
+                cursor.executemany(sql, board_ids)
+                sql = "DELETE FROM labels WHERE board_id=%s"
+                cursor.executemany(sql, board_ids)
+                sql = "DELETE FROM user_boards WHERE unique_id=%s"
+                cursor.execute(sql, (unique_id,))
+                sql = "DELETE FROM teams WHERE unique_id=%s"
+                cursor.execute(sql, (unique_id,))
+            self.connection.commit()
+            return True
+        except:
+            return False
+        finally:
+            self.connection.close()
+
+    """
+CREATE TABLE IF NOT EXISTS personal (
+    id int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    user_id int(11) NOT NULL,
+    unique_id varchar(255) COLLATE utf8_bin NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS user_boards (
+    id int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    board_id int(11) NOT NULL,
+    unique_id varchar(255) COLLATE utf8_bin NOT NULL,
+    team BIT,
+    starred BIT
+);
+
+CREATE TABLE IF NOT EXISTS boards (
+    id int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    board_name varchar(255) COLLATE utf8_bin NOT NULL,
+    bg_color varchar(255) COLLATE utf8_bin,
+    url varchar(255) UNIQUE COLLATE utf8_bin NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS labels (
+    id int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    color varchar(255) COLLATE utf8_bin NOT NULL,
+    text varchar(255) COLLATE utf8_bin NOT NULL,
+    board_id int(11) NOT NULL
+);
+"""
+
+    def _get_board_id_from_urle(self, url, user_id):
+        try:
+            with self.connection.cursor() as cursor:
+                sql = "SELECT boards.id FROM boards JOIN user_boards ON user_boards.board_id = boards.id JOIN personal ON personal.unique_id = user_boards.unique_id WHERE boards.url=%s AND personal.user_id=%s"
+                cursor.execute(sql, (url, user_id))
+                result = cursor.fetchone()
+                return result
+        finally:
+            self.connection.close()
+
+    def remove_board(self, url, username):
+
+        ##select id from boards where url=%s;
+        ##rm id from labels where board_id=id;
+        ##select unique_id from user_boards where board_id=id;
+        ##rm boards unique_id
+        ##rm personal unique_id
+        try:
+            #is_team = False if team_name == '' else True
+            user_id = Database().get_userid_from_username(username)
+            #unique_id = Database()._get_teams_unique_id(team_name, user_id)
+            #board_ids = [elem['board_id'] for elem in Database().get_board_ids_from_unique_id(unique_id)]
+            with self.connection.cursor() as cursor:
+                ids = Database()._get_board_id_from_urle(url, user_id)
+                print(ids)
+                #sql = "DELETE FROM boards WHERE id=%s"
+                #cursor.execute(sql, (board_id,))
+                #sql = "DELETE FROM user_boards WHERE board_id=%s"
+                #cursor.execute(sql, (board_id,))
+                """sql = "DELETE FROM boards WHERE id=%s"
+                cursor.executemany(sql, board_ids)
+                sql = "DELETE FROM labels WHERE board_id=%s"
+                cursor.executemany(sql, board_ids)
+                sql = "DELETE FROM user_boards WHERE unique_id=%s"
+                cursor.execute(sql, (unique_id,))
+                sql = "DELETE FROM teams WHERE unique_id=%s"
+                cursor.execute(sql, (unique_id,))
+            self.connection.commit()"""
+            return True
+        except Exception as e:
+            print(e)
+            return False
+        finally:
+            self.connection.close()
+
     def get_usernames_from_teams_unique_id(self, unique_id):
         try:
             with self.connection.cursor() as cursor:
@@ -238,7 +342,6 @@ class Database:
             return []
         finally:
             self.connection.close()
-        return []
 
     def get_teams(self, username):
         try:
@@ -303,11 +406,12 @@ class Database:
         finally:
             self.connection.close()
 
-    def board_exists(self, team_name, board_name, username):################################################################################################"
+    def board_exists(self, team_name, board_name, username):
         try:
+            user_id = Database().get_userid_from_username(username)
             with self.connection.cursor() as cursor:
-                sql = "SELECT id FROM boards WHERE team_name=%s AND board_name=%s"#######################
-                cursor.execute(sql, (team_name, board_name))
+                sql = "SELECT boards.id FROM boards JOIN user_boards ON user_boards.board_id = boards.id JOIN personal ON personal.unique_id = user_boards.unique_id WHERE boards.board_name=%s AND personal.user_id=%s"
+                cursor.execute(sql, (board_name, user_id))
                 result = cursor.fetchone()
                 return 'id' in result
         except:
@@ -521,20 +625,3 @@ class Database:
             return []
         finally:
             self.connection.close()
-
-"""    def add_list(self, url, index, text):
-        try:
-            board_id = Database()._get_board_id_from_url(url)
-            with self.connection.cursor() as cursor:
-                sql = "INSERT INTO lists (board_id, index, text) VALUES (%s, %s, %s)"
-                cursor.execute(sql, (board_id, index, text))
-            self.connection.commit()
-            return True
-        except:
-            return False
-        finally:
-            self.connection.close()
-
-    def move_list(self, url, index):
-        pass
-"""

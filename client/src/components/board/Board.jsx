@@ -233,12 +233,12 @@ export default class Board extends React.Component {
             <div>
                 <div style={{display:'flex', flexDirection: 'row'}}>
                     {
-                        this.state.boardParams.favorite ?
+                        this.state.boardParams.favorite === "true" ?
                                 <StarBorderIcon style={{marginRight: '10px', height: '25px', color: 'yellow'}} />
                                 :
                                 <StarBorderIcon style={{marginRight: '10px', height: '25px', color: 'white'}} />
                     }
-                    <Typography style={{fontWeight: 'bold', fontSize: '20px', color:'white'}}>Board Name</Typography>
+                    <Typography style={{fontWeight: 'bold', fontSize: '20px', color:'white'}}>{this.state.boardParams.title}</Typography>
                 </div>
                 <div style={{marginTop: '20px', display: "flex"}}>
                     <DragDropContext onDragEnd={this.onDragEnd} onDragStart={this.onDragStart}>
