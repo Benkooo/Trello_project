@@ -118,13 +118,9 @@ export default class Board extends React.Component {
             })
     }
 
-    componentDidMount() {
-        const id = localStorage.getItem("id");
-        const url = this.state.boardParams.url;
-        console.log("ID", id);
-        console.log("ID", url);
+    getBoard(id, url) {
         axios.post('http://localhost:5000/' + url + '/get_board_data', {
-            }, {
+        }, {
             headers: {
                 unique_login: id
             }
@@ -137,6 +133,15 @@ export default class Board extends React.Component {
                 console.error(err)
             })
         this.setState({id: id, url: url});
+
+    }
+
+    componentDidMount() {
+        const id = localStorage.getItem("id");
+        const url = this.state.boardParams.url;
+        console.log("ID", id);
+        console.log("ID", url);
+        this.getBoard(id, url)
     }
 
     editTitle = (text, index) => {
