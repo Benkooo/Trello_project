@@ -20,6 +20,7 @@ const CreateBoard: React.FC<Props> = ({
     const [teamList, setTeamList] = useState([])
     const [dispBar, setDispBar] = useState(false)
     const [selectedTeam, setSelectedTeam ] = useState('')
+    const isEmpty = !(title) as boolean
 
     const handleChangeTeam = (e: any) => {
         setSelectedTeam(e.target.value)
@@ -88,7 +89,9 @@ const CreateBoard: React.FC<Props> = ({
                         id="name"
                         label="Board title"
                         value={title}
-                        onChange={(e: any) => setTitle(e.target.value)}
+                        onChange={(e: any) => {
+                            setTitle(e.target.value)
+                        }}
                         type="email"
                         fullWidth
                     />
@@ -116,7 +119,7 @@ const CreateBoard: React.FC<Props> = ({
                     <Button style={{textTransform: 'none'}} onClick={handleClose} variant="contained">
                         Cancel
                     </Button>
-                    <Button onClick={postBoard} style={{textTransform: 'none', color: 'primary', marginRight: '18px'}} variant="contained" color="primary">
+                    <Button disabled={isEmpty} onClick={postBoard} style={{textTransform: 'none', color: 'primary', marginRight: '18px'}} variant="contained" color="primary">
                         Create Board
                     </Button>
                 </DialogActions>

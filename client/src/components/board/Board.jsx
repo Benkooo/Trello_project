@@ -230,7 +230,7 @@ export default class Board extends React.Component {
     render() {
         console.log("1: ", this.state.items);
         return (
-            <div>
+            <div style={{fontFamily: 'Product Sans'}}>
                 <div style={{display:'flex', flexDirection: 'row'}}>
                     {
                         this.state.boardParams.favorite === "true" ?
