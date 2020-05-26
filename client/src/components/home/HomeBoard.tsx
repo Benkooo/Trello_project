@@ -17,6 +17,7 @@ const HomeBoard: React.FC<Props> = ({id}) => {
     const [ open, setOpen ] = useState(false)
     const [ boardList, setBoardList] = useState([])
     const [ favoriteList, setFavoriteList ] = useState([])
+    const [ boardUpdate, setBoardUpdate] = useState(false)
 
     const getBoards = (id: string) => {
 
@@ -37,7 +38,8 @@ const HomeBoard: React.FC<Props> = ({id}) => {
     useEffect(() => {
         if (id)
             getBoards(id)
-    }, []);
+        setBoardUpdate(false);
+    }, [boardUpdate]);
 
     const handleClickOpen = () => {
         setOpen(true)
@@ -79,6 +81,11 @@ const HomeBoard: React.FC<Props> = ({id}) => {
 
     console.log("BOARD LIST : ", boardList)
     console.log('FAV LIST : ', favoriteList)
+    const updatingBoard = () => {
+        setBoardUpdate(true);
+    }
+
+    console. log("BOARD LIST : ", boardList)
 
     return (
         <div style={{
@@ -134,7 +141,7 @@ const HomeBoard: React.FC<Props> = ({id}) => {
                             </Card>
                         </CardActionArea>
                     </Grid>
-                    <CreateBoard open={open} handleClose={handleClose} id={id}/>
+                    <CreateBoard updatingBoard={updatingBoard} open={open} handleClose={handleClose} id={id}/>
                 </Grid>
             </div>
         </div>

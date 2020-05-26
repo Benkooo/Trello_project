@@ -27,9 +27,8 @@ const HomePage: React.FC = () => {
     const classes = useStyles()
     const router = useRouter()
     const uniqueId = router.query.id as string
-
     console.log("AYAYAYAYA", uniqueId)
-
+ 
     return (
         <div className={classes.root} >
             <Topbar id={uniqueId}/>

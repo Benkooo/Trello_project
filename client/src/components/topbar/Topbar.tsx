@@ -21,10 +21,12 @@ import TopbarBoardList from './TopbarBoardList'
 import TopbarProfile from './TopbarProfile'
 
 interface Props {
-    id: string
+    id: string,
+    color: string,
+    board: boolean
 }
 
-const Topbar: React.FC<Props> = ({id}) => {
+const Topbar: React.FC<Props> = ({id, color, board}) => {
     const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
     const [ anchorElBoard, setAnchorElBoard] = React.useState<null | HTMLElement>(null);
     const userEmail = getString("userEmail")
@@ -43,9 +45,31 @@ const Topbar: React.FC<Props> = ({id}) => {
         setAnchorElBoard(null)
     };
 
+    const hexToRGB = (hex: string) => {
+        console.log(hex)
+        hex = '0x' + hex
+        let r = hex >> 16 & 0xFF
+        let g = hex >> 8 & 0xFF
+        let b = hex & 0xFF
+        console.log(`rgb(${r}, ${g}, ${b})`)
+        console.log(`rgb(${r - 10}, ${g - 10}, ${b - 10})`)
+        return `rgb(${r - 20}, ${g - 20}, ${b - 20})`
+    }
+
+    const hexToRGBButton = (hex: string) => {
+        console.log(hex)
+        hex = '0x' + hex
+        let r = hex >> 16 & 0xFF
+        let g = hex >> 8 & 0xFF
+        let b = hex & 0xFF
+        console.log(`rgb(${r}, ${g}, ${b})`)
+        console.log(`rgb(${r + 100}, ${g + 20}, ${b - 20})`)
+        return `rgb(${r + 100}, ${g + 20}, ${b - 20})`
+    }
+
     return (
         <div style={{flexGrow: 1}}>
-            <AppBar style={{height: '43px', backgroundColor: '#366AA8'}} elevation={2} position="fixed">
+            <AppBar style={{height: '43px', backgroundColor: board ? hexToRGB(color.substr(1)) : '#366AA8'}} elevation={2} position="fixed">
                 <Toolbar>
                     <Link
                         href='/home'
@@ -59,7 +83,7 @@ const Topbar: React.FC<Props> = ({id}) => {
                             <HomeIcon />
                         </IconButton>
                     </Link>
-                    <Card style={{ backgroundColor: '#67A6CA', marginBottom: '21px', width: '250px', maxWidth: '120px', minWidth: '120px', height: '32px', justifyContent: 'center', alignItems: 'center', display: 'flex'}} >
+                    <Card style={{ backgroundColor: board ? hexToRGBButton(color.substr(1)) : '#67A6CA', marginBottom: '21px', width: '250px', maxWidth: '120px', minWidth: '120px', height: '32px', justifyContent: 'center', alignItems: 'center', display: 'flex'}} >
                         <CardActionArea onClick={handleClickBoard}>
                             <div style={{color: 'white', display: 'flex', justifyContent: 'center', height: '32px', alignItems: 'center', flexDirection: 'row'}}>
                                 <TableChartIcon style={{marginRight: '23px'}}/>
@@ -71,7 +95,7 @@ const Topbar: React.FC<Props> = ({id}) => {
                     </Card>
                     <TopbarBoardList id={id} anchorEl={anchorElBoard} handleClose={handleClose}/>
 
-                    <Card style={{ width: '180px', minWidth: '120px', marginLeft: '5px',backgroundColor: '#67A6CA', marginBottom: '21px', position: 'relative'}}>
+                    <Card style={{ width: '180px', minWidth: '120px', marginLeft: '5px',backgroundColor: board ? hexToRGBButton(color.substr(1)) : '#67A6CA', marginBottom: '21px', position: 'relative'}}>
                         <div style={{color: 'white', marginLeft: '10px', marginBottom: '21px', height: '100%', position: 'absolute', pointerEvents: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
                             <SearchIcon />
                         </div>
@@ -80,7 +104,7 @@ const Topbar: React.FC<Props> = ({id}) => {
                             placeholder="Search…"
                         />
                     </Card>
-                    
+
                     <div style={{display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '15px', marginLeft: 'auto'}}>
                         <a href='/home'>
                             <img src="./logo.png"/>
