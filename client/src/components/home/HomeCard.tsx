@@ -8,10 +8,11 @@ interface Props {
     addItems: any,
     favorite: boolean,
     color: string,
-    url: string
+    url: string,
+    id: string
 }
 
-const HomeCard: React.FC<Props> = ({title, addItems, favorite, color, url}) => {
+const HomeCard: React.FC<Props> = ({title, addItems, favorite, color, url, id}) => {
 
     const doRedirect = () => {
         Router.push({
@@ -20,7 +21,8 @@ const HomeCard: React.FC<Props> = ({title, addItems, favorite, color, url}) => {
                 title: title,
                 favorite: favorite,
                 color: color,
-                url: url
+                url: url,
+                id: id
             }
         })
     }
