@@ -20,7 +20,6 @@ const HomeList: React.FC<Props> = ({id}) => {
     const [open, setOpen] = useState(true)
     const [openTeam, setOpenTeam] = useState(false)
     const [teamList, setTeamList] = useState([])
-    const [tmp, setTmp ] = useState([])
     
     const getTeams = (id: string) => {
         axios.get('http://localhost:5000/get_teams', {
@@ -42,7 +41,7 @@ const HomeList: React.FC<Props> = ({id}) => {
     useEffect(() => {
         if (id)
             getTeams(id)
-    }, []);
+    }, [teamList]);
   
     const handleClick = () => {
         setOpen(!open)

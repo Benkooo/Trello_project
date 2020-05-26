@@ -103,7 +103,7 @@ const HomeBoard: React.FC<Props> = ({id}) => {
                         <> 
                             {boardList.map((i: any, index: number) => (
                                 <Grid key={index} item xs={4}>
-                                    <HomeCard key={index} addItems={addItems} color={i.bg_color} title={i.board_name} favorite={i.starred} url={i.url}/>
+                                    <HomeCard key={index} id={id} addItems={addItems} color={i.bg_color} title={i.board_name} favorite={i.starred} url={i.url}/>
                                 </Grid>
                             ))}
                         </>
