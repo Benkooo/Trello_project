@@ -12,13 +12,14 @@ interface Props {
 
 
 const HomeBoard: React.FC<Props> = ({id}) => {
-    
+
     const [ favoriteItems, setFavoriteItems ] = useState(Array<string>())
     const [ open, setOpen ] = useState(false)
     const [ boardList, setBoardList] = useState([])
+    const [ boardUpdate, setBoardUpdate] = useState(false)
 
     const getBoards = (id: string) => {
-    
+
         axios.get('http://localhost:5000/get_personal_boards', {
             headers: {
                 unique_login: id
@@ -36,7 +37,8 @@ const HomeBoard: React.FC<Props> = ({id}) => {
     useEffect(() => {
         if (id)
             getBoards(id)
-    }, []);
+        setBoardUpdate(false);
+    }, [boardUpdate]);
 
     const handleClickOpen = () => {
         setOpen(true)
@@ -64,6 +66,10 @@ const HomeBoard: React.FC<Props> = ({id}) => {
         )
     }
 
+    const updatingBoard = () => {
+        setBoardUpdate(true);
+    }
+
     console. log("BOARD LIST : ", boardList)
 
     return (
@@ -82,7 +88,7 @@ const HomeBoard: React.FC<Props> = ({id}) => {
                 <Grid container spacing={3}>
                         {favoriteItems.map((value: string, index: number) => (
                             <Grid key={index} item xs={4}>
-                                <HomeCard addItems={removeItems} title={value} favorite={true}/>
+                                <HomeCard addItems={removeItems} title={value} favorite={true} color={"a"} id={"a"} url={"a"}/>
                             </Grid>
                         ))}
                 </Grid>
@@ -100,7 +106,7 @@ const HomeBoard: React.FC<Props> = ({id}) => {
                 <Grid container spacing={3}>
                     {
                         boardList &&
-                        <> 
+                        <>
                             {boardList.map((i: any, index: number) => (
                                 <Grid key={index} item xs={4}>
                                     <HomeCard key={index} id={id} addItems={addItems} color={i.bg_color} title={i.board_name} favorite={i.starred} url={i.url}/>
@@ -115,7 +121,7 @@ const HomeBoard: React.FC<Props> = ({id}) => {
                             </Card>
                         </CardActionArea>
                     </Grid>
-                    <CreateBoard open={open} handleClose={handleClose} id={id}/>
+                    <CreateBoard updatingBoard={updatingBoard} open={open} handleClose={handleClose} id={id}/>
                 </Grid>
             </div>
         </div>

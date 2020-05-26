@@ -506,8 +506,6 @@ class Database:
                 cursor.execute(sql, (_json, board_id))
             self.connection.commit()
             return True
-        except:
-            return False
         finally:
             self.connection.close()
 

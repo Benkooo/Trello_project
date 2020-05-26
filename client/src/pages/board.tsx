@@ -37,7 +37,7 @@ const BoardPage = (props: any) => {
     return (
         <div className={classes.root}>
             <div>
-                <Topbar id="odod"/>
+                <Topbar id="odod" color={router.query.color} board={true}/>
                 <div style={{display: "flex", marginRight: "auto", marginLeft: "10px", marginTop: "10px"}}>
                     <Typography style={{color: "white", fontSize: "25px"}}> Project: Trello</Typography>
                 </div>
