@@ -28,7 +28,7 @@ const HomePage: React.FC = () => {
     const classes = useStyles()
     const router = useRouter()
     const uniqueId = router.query.id as string
-
+    localStorage.setItem("id", uniqueId);
     console.log("AYAYAYAYA", uniqueId)
 
     return (

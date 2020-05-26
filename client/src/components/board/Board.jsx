@@ -1,8 +1,24 @@
 import React from "react";
 import {DragDropContext, Draggable, Droppable} from "react-beautiful-dnd";
-import {Button, Typography} from "@material-ui/core";
+import {Button, Typography, withStyles} from "@material-ui/core";
 import AddIcon from "@material-ui/icons/Add";
 import BoardColumn from "./BoardColumn";
+import {LoginResponse} from "../../interfaces/requests";
+import {storeString} from "../../helpers/SessionStorageHelper";
+import axios from "axios";
+
+const StyledButton = withStyles({
+    root: {
+        color: 'white',
+        height: '40px',
+        display: 'flex',
+        textTransform: 'none',
+        background: "rgba(255, 255, 255, 0.25)",
+        '&:hover': {
+            background: "rgba(255, 255, 255, 0.3)",
+        },
+    },
+})(Button);
 
 const getNewListId = (items) => {
     let i = 0;
@@ -13,7 +29,7 @@ const getNewListId = (items) => {
 const getItems = (count, offset = 0) =>
     Array.from({ length: count }, (v, k) => k).map(k => ({
         id: `item-${k + offset}-${new Date().getTime()}`,
-        content: `item ${k + offset}`
+        content: `Enter card title...`
     }));
 
 const getItemsHor = count =>
@@ -50,16 +66,9 @@ const move = (source, destination, droppableSource, droppableDestination) => {
 
 const grid = 8;
 
-const getItemStyle = (isDragging, draggableStyle) => ({
-    userSelect: "none",
-    padding: grid * 2,
-    margin: `0 0 ${grid}px 0`,
-    ...draggableStyle
-});
-
 const getItemStyleHor = (isDragging, draggableStyle) => ({
     userSelect: 'true',
-    padding: grid * 2,
+    padding: 0,
     margin: `0 ${grid}px 0 0`,
     ...draggableStyle,
 });
@@ -67,23 +76,66 @@ const getItemStyleHor = (isDragging, draggableStyle) => ({
 const getListStyleHor = isDraggingOver => ({
     background: 'F4F5F7',
     display: 'flex',
-    padding: grid,
+    padding: 0,
     overflow: 'auto',
 });
 
 
 export default class Board extends React.Component {
+
     constructor(props) {
         super(props);
         this.state = {
-            items: [[getItems(0), "list-0"]],
-            itemsHor: getItemsHor(5),
+            items: [],
+            boardParams: this.props.boardParams,
             focused: false,
             isColDisabled: false,
-            isRowDisabled: false
+            isRowDisabled: false,
+            editingCard: false,
         };
         this.onDragEndHor = this.onDragEndHor.bind(this);
         this.addElement = this.addElement.bind(this);
+    }
+
+    updateData() {
+        axios.post('http://localhost:5000/' + this.state.boardParams.url + '/change_board_data', {
+                json: this.state.items
+            },{
+            headers: {
+                unique_login: this.state.boardParams.id
+            }
+        })
+            .then(res => {
+                console.log("RESPONSE", res.data)
+            })
+            .catch(err => {
+                console.error(err)
+            })
+    }
+
+    componentDidMount() {
+        console.log("ID", localStorage.getItem("id"));
+        axios.post('http://localhost:5000/' + this.state.boardParams.url + '/get_board_data', {
+            }, {
+            headers: {
+                unique_login: this.state.boardParams.id
+            }
+        })
+            .then(res => {
+                console.log("RESPONSE", res.data)
+                this.setState({items: res.data.data})
+            })
+            .catch(err => {
+                console.error(err)
+            })
+    }
+
+    editTitle = (text, index) => {
+        const cpy = this.state.items.slice();
+        console.log(cpy);
+        cpy[index][2] = text;
+        console.log(cpy);
+        this.setState({items: cpy})
     }
 
     onDragStart = (result) => {
@@ -133,6 +185,7 @@ export default class Board extends React.Component {
             console.log(cpy);
             console.log("LOG2: ", this.state.items[sInd][0]);
             this.setState({items: cpy});
+            this.updateData();
         }
     }
 
@@ -146,19 +199,32 @@ export default class Board extends React.Component {
 
         const items = reorder(this.state.items[0], source.index, destination.index);
         this.setState({items: items});
+        this.updateData();
+    }
+
+    editCard = (title, listIndex, cardIndex) => {
+        console.log("EDITCARD: ", title, listIndex, cardIndex)
+        const cpy = this.state.items.slice();
+        cpy[listIndex][0][cardIndex].content = title;
+        console.log(cpy);
+        this.setState({items: cpy})
+        this.updateData();
     }
 
     addElement(index) {
+        this.setState({editingCard: true});
         const cpy = this.state.items.slice();
         cpy[index][0] = this.state.items[index][0].concat(getItems(1, 10));
         this.setState({items: cpy});
+        this.updateData();
     }
 
     render() {
         console.log("1: ", this.state.items);
         return (
             <div>
-                <div style={{display: "flex"}}>
+                <Typography style={{fontWeight: 'bold', fontSize: '20px', color:'white'}}>Board Name</Typography>
+                <div style={{marginTop: '20px', display: "flex"}}>
                     <DragDropContext onDragEnd={this.onDragEnd} onDragStart={this.onDragStart}>
                         <Droppable droppableId="droppable" direction="horizontal" isDropDisabled={this.state.isColDisabled}>
                             {(provided, snapshot) => (
@@ -167,34 +233,42 @@ export default class Board extends React.Component {
                                     style={getListStyleHor(snapshot.isDraggingOver)}
                                     {...provided.droppableProps}
                                 >
-                                    {this.state.items.map((el, ind) => (
-                                        <Draggable key={el[1]} draggableId={el[1]} index={ind} isDragDisabled={this.state.isColDisabled}>
-                                            {(provided, snapshot) => (
-                                                <div
-                                                    ref={provided.innerRef}
-                                                    {...provided.draggableProps}
-                                                    {...provided.dragHandleProps}
-                                                    style={getItemStyleHor(
-                                                        snapshot.isDragging,
-                                                        provided.draggableProps.style
-                                                    )}
-                                                >
-                                                    <Droppable key={ind} droppableId={`${ind}`} isDropDisabled={this.state.isRowDisabled}>
-                                                        {(provided, snapshot) => (
-                                                            <BoardColumn isRowDisabled={this.state.isRowDisabled} addElement={this.addElement} items={this.state.items} snapshot={snapshot} provided={provided} element={el[0]} index={ind}/>
+                                    {this.state.items.map((el, ind) => {
+                                        console.log("INNNNN");
+                                        return (
+                                            <Draggable key={el[1]} draggableId={el[1]} index={ind} isDragDisabled={this.state.isColDisabled}>
+                                                {(provided, snapshot) => (
+                                                    <div
+                                                        ref={provided.innerRef}
+                                                        {...provided.draggableProps}
+                                                        {...provided.dragHandleProps}
+                                                        style={getItemStyleHor(
+                                                            snapshot.isDragging,
+                                                            provided.draggableProps.style
                                                         )}
-                                                    </Droppable>
-                                                </div>
-                                            )}
-                                        </Draggable>
-                                    ))}
+                                                    >
+                                                        <Droppable key={ind} droppableId={`${ind}`} isDropDisabled={this.state.isRowDisabled}>
+                                                            {(provided, snapshot) => (
+                                                                <BoardColumn editingCard={this.state.editingCard} editCard={this.editCard} editTitle={this.editTitle} title={el[2]} isRowDisabled={this.state.isRowDisabled} addElement={this.addElement} items={this.state.items} snapshot={snapshot} provided={provided} element={el[0]} index={ind}/>
+                                                            )}
+                                                        </Droppable>
+                                                    </div>
+                                                )}
+                                            </Draggable>
+                                        )
+                                    })}
                                     {provided.placeholder}
-                                    <Button style={{color: 'white', height: '40px', display: 'flex', textTransform: 'none'}} onClick={() => {
-                                        this.setState({items: [...this.state.items, [[], getNewListId(this.state.items)]]});
+                                    <StyledButton style={{color: 'white',
+                                        height: '40px',
+                                        display: 'flex',
+                                        textTransform: 'none',
+                                        background: "rgba(255, 255, 255, 0.25)",}}
+                                        onClick={() => {
+                                        this.setState({items: [...this.state.items, [[], getNewListId(this.state.items), "Enter list title..."]]});
                                     }}>
                                         <AddIcon/>
                                         <Typography> Add another list </Typography>
-                                    </Button>
+                                    </StyledButton>
                                 </div>
                             )}
                         </Droppable>

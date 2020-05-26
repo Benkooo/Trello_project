@@ -9,45 +9,9 @@ import {TextField} from "@material-ui/core";
 import EdiText from 'react-editext'
 import styled from "styled-components";
 import CardDialog from "./CardDialog";
+import EditableLabelOR from "./EdiText";
 
 const grid = 8;
-
-const StyledEdiText = styled(EdiText)`
-  button {
-    border-radius: 5px;
-  }
-  button[editext="edit-button"] {
-    color: #000;
-    width: 40px;
-    background: #fff;
-    border: 0;
-        &:hover {
-      border: 1px;
-      background: #f1f1f1
-    }
-  }
-  button[editext="save-button"] {
-    width: 50px;
-    &:hover {
-      background: greenyellow;
-    }
-  }
-  button[editext="cancel-button"] {
-    &:hover {
-      background: crimson;
-      color: #fff;
-    }
-  }
-  input, textarea {
-    background: #fff;
-    color: #000;
-    font-weight: bold;
-    border-radius: 5px;
-  }
-  div[editext="view-container"], div[editext="edit-container"] {
-    color: #000;
-}
-`;
 
 const getListStyle = isDraggingOver => ({
     background: "#ebecf0",
@@ -56,12 +20,6 @@ const getListStyle = isDraggingOver => ({
     marginLeft: '10px',
     marginRight: '10px',
 });
-
-const getItems = (count, offset = 0) =>
-    Array.from({ length: count }, (v, k) => k).map(k => ({
-        id: `item-${k + offset}-${new Date().getTime()}`,
-        content: `item ${k + offset}`
-    }));
 
 const getItemStyle = (isDragging, draggableStyle) => ({
     userSelect: "none",
@@ -77,16 +35,20 @@ export default class BoardColumn extends React.Component {
         super(props);
         this.state = {
             focused: false,
-            edit: true,
-            open: false
+            cardFocused: false,
+            edit: false,
+            open: false,
+            cardIndex : 0
         };
         this._handleFocus = this._handleFocus.bind(this);
-        this._handleFocusOut = this._handleFocusOut.bind(this);
+        this._handleFocusList = this._handleFocusList.bind(this);
+        this._handleFocusOutList = this._handleFocusOutList.bind(this);
+
     }
 
-    handleClickOpen() {
+    handleClickOpen(index) {
         console.log("OPEEEEEEN DIALOG")
-        this.setState({open: true});
+        this.setState({cardIndex: index, open: true});
     };
 
     handleClose = () => {
@@ -100,48 +62,65 @@ export default class BoardColumn extends React.Component {
         console.log('Edited Value -> ', val)
     };
 
-    _handleFocus(text) {
+
+    handleSave = (value) => {
+        console.log(value);
+        this.props.editCard(value, this.props.index, index);
+    };
+
+    _handleFocusList(text) {
         this.setState({edit: true, focused: true});
         console.log('Focused with text: ' + text);
     }
 
-    _handleFocusOut(text) {
+    _handleFocus(text) {
+        this.setState({cardFocused: true});
+        console.log('Focused with text: ' + text);
+    }
+
+    _handleFocusOutList(text) {
         if (text.trim() !== "") {
             console.log("INSIDE");
             this.setState({edit: false, focused: false});
+            this.props.editTitle(text, this.props.index);
             console.log('Left editor with text: ' + text);
         }
     }
 
     render() {
         console.log("FUIAHFUIAPROUT");
-        console.log(this.state.edit);
+        console.log(this.props.title);
         return(
             <div>
-            <CardDialog open={this.state.open} handleClose={this.handleClose}/>
-            <Card ref={this.props.provided.innerRef}
+                {this.state.open &&
+                    <CardDialog editCard={this.props.editCard} listIndex={this.props.index} title={this.props.items[this.props.index][0][this.state.cardIndex].content} index={this.state.cardIndex} open={this.state.open} handleClose={this.handleClose}/>
+                }
+                <Card ref={this.props.provided.innerRef}
                   style={getListStyle(this.props.snapshot.isDraggingOver)} {...this.props.provided.droppableProps}>
                 <div style={{
                     marginTop: this.state.focused ? 0 : '10px',
                     marginBottom: this.state.focused ? '7px' : '15px',
                     marginLeft: '10px'
                 }}>
-                    <EditableLabel text=''
+                    <EditableLabelOR text={this.props.title}
                                    isEditing={this.state.edit}
+                                   emptyEdit={true}
                                    labelClassName='myLabelClass'
-                                   labelPlaceHolder='Enter list title...'
+                                   inputPlaceHolder='Enter list title...'
                                    inputClassName='myInputClass'
                                    inputWidth='280px'
                                    inputHeight='30px'
                                    inputMaxLength={50}
+                                   inputFontSize='19px'
+                                   labelFontSize='19px'
                                    labelFontWeight='regular'
                                    inputFontWeight='regular'
-                                   onFocus={this._handleFocus}
-                                   onFocusOut={this._handleFocusOut}
+                                   onFocus={this._handleFocusList}
+                                   onFocusOut={this._handleFocusOutList}
                     />
                 </div>
                 {this.props.element.map((item, index) => {
-                    //console.log("TEST: ",item.id);
+                    console.log("ITEM CONTENT: ", item.content);
                     return (
                     <Draggable key={item.id} draggableId={item.id} index={index} isDragDisabled={this.props.isRowDisabled}>
                         {(provided, snapshot) => (
@@ -150,9 +129,34 @@ export default class BoardColumn extends React.Component {
                                 {...provided.draggableProps}
                                 {...provided.dragHandleProps}
                                 style={getItemStyle(snapshot.isDragging, provided.draggableProps.style)}
-                                onClick={() => this.handleClickOpen()}
+                                onClick={() => this.handleClickOpen(index)}
                             >
-                                <Typography>{item.content}</Typography>
+                                <div style={{
+                                    marginTop: this.state.cardFocused ? 0 : '10px',
+                                    marginBottom: this.state.cardFocused ? 0 : '10px',
+                                    marginLeft: '5px'
+                                }}>
+                                <EditableLabelOR text={item.content}
+                                               index={index}
+                                               isEditing={this.props.editingCard}
+                                               labelClassName='myLabelClass'
+                                               inputPlaceHolder='Enter list title...'
+                                               inputWidth='290px'
+                                               inputHeight='30px'
+                                               inputMaxLength='150'
+                                               inputFontSize='18px'
+                                               labelFontSize='18px'
+                                               labelFontWeight='regular'
+                                               inputFontWeight='regular'
+                                               onFocus={this._handleFocus}
+                                               onFocusOut={(text) => {
+                                                   console.log(index);
+                                                   this.setState({cardFocused: false});
+                                                   this.props.editCard(text, this.props.index, index);
+                                                   console.log('Left editor with text: ' + text);
+                                               }}
+                                />
+                                </div>
                             </Card>
                         )}
                     </Draggable>
